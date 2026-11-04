@@ -1,0 +1,7 @@
+# Dependensi & konfigurasi lokal
+vendor/
+.env
+*.log
+# Catatan kerja / template
+PROGRESS.md
+report.html

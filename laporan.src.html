@@ -1,0 +1,507 @@
+<p>&nbsp;</p>
+
+<h1 style="text-align: center;">Pengenalan Framework CodeIgniter 4: SIAKAD dan Toko Online</h1>
+
+<div style="background-color: #f8f9fa; border-radius: 10px; border: 1px solid rgb(226, 232, 240); margin: 20px auto; max-width: 480px; padding: 16px 24px; text-align: center;">
+  <p style="margin: 0px;"><b>Nama:</b> Mathias Adya Diwangkara Suganda<br /><b>NRP:</b> 5025231015<br /><b>Kelas:</b> Pemrograman Berbasis Kerangka Kerja (D)</p></div><div><br /></div>
+<div><b>Kode:</b> folder <code>siakad/</code> dan <code>toko-online/</code> (CodeIgniter 4.7.6)</div>
+<div><b>Source code (GitHub):&nbsp;<a href="https://github.com/MathiasAdya/pbkk-codeigniter4" target="_blank">github.com/MathiasAdya/pbkk-codeigniter4</a></b></div>
+<div><b>Referensi:&nbsp;<a href="https://fajarbaskoro.blogspot.com/2019/02/pbkk-2-pengenalan-framework-code-igniter.html" target="_blank">[LINK]</a></b></div><div><br /></div>
+
+<h2>Soal: Latihan 1 dan Latihan 2</h2>
+<p><b>Latihan 1</b> meminta penerapan materi pengenalan CodeIgniter. Setiap topik dikerjakan di dalam aplikasi Latihan 2:</p>
+<table>
+<tr class="h"><th>No</th><th>Topik Latihan 1</th><th>Penerapan</th></tr>
+<tr><td>1</td><td>Instalasi dan konfigurasi CI</td><td>Instalasi CI 4.7.6 lewat Composer, konfigurasi <code>.env</code> (baseURL, database), migration dan seeder (Bagian 1).</td></tr>
+<tr><td>2</td><td>Router dan Controller</td><td><code>app/Config/Routes.php</code> dengan route group, namespace <code>Admin</code>, parameter <code>(:num)</code>, filter per group.</td></tr>
+<tr><td>3</td><td>View Bootstrap</td><td>Halaman publik dan form login memakai Bootstrap 4, view dipecah menjadi layout dan partial.</td></tr>
+<tr><td>4</td><td>SB Admin</td><td>Layout <code>layouts/admin.php</code> memakai template <b>SB Admin 2</b>: sidebar per role, topbar, card, dan tabel.</td></tr>
+<tr><td>5</td><td>Model dan CRUD</td><td>Model CI4 dengan validasi, query builder, join, dan paginasi. CRUD lengkap untuk master data.</td></tr>
+<tr><td>6</td><td>File upload</td><td>Upload foto mahasiswa dan gambar produk dengan validasi <code>is_image</code>, <code>max_size</code>, dan <code>mime_in</code>.</td></tr>
+<tr><td>7</td><td>Hak akses user</td><td>Login dengan password ter-hash, session, dan <code>AuthFilter</code> berparameter role (<code>auth:admin</code>).</td></tr>
+</table>
+<p><b>Latihan 2</b> meminta dua aplikasi: <b>SIAKAD</b> (Sistem Informasi Akademik) dan <b>Toko Online</b>, keduanya dengan CodeIgniter.</p>
+
+<h2>Pendahuluan</h2>
+<p><b>CodeIgniter 4</b> adalah framework PHP berpola <b>MVC</b> (Model-View-Controller) yang ringan dan cepat. Request masuk lewat <code>public/index.php</code> lalu dicocokkan oleh <b>Router</b>. Sebelum masuk ke Controller, request melewati <b>Filter</b> (misalnya CSRF dan cek login). Controller mengambil data lewat <b>Model</b> dan mengirimkannya ke <b>View</b>. Laporan ini membahas pembuatan dua aplikasi:</p>
+<ul>
+<li><b>SIAKAD</b>: tiga role (admin, dosen, mahasiswa). Admin mengelola mahasiswa, dosen, dan matakuliah. Mahasiswa mengisi KRS dan melihat KHS beserta IP/IPK. Dosen menginput nilai.</li>
+<li><b>Toko Online</b>: katalog produk dengan kategori, keranjang belanja, checkout, riwayat pesanan, serta panel admin untuk produk, kategori, dan pesanan.</li>
+</ul>
+<p>Lingkungan pengembangan: Windows 11 + WSL, XAMPP (PHP 8.2 dan MariaDB), Composer, dan browser Microsoft Edge.</p>
+
+<h2>Bagian 1: Instalasi dan Konfigurasi CodeIgniter 4</h2>
+
+<step n="1">Instalasi CodeIgniter lewat Composer</step>
+<p>Proyek dibuat dari <i>app starter</i> resmi. Hasilnya adalah folder dengan struktur <code>app/</code> (kode aplikasi), <code>public/</code> (document root), <code>writable/</code> (cache, log, session), dan <code>vendor/</code> (framework).</p>
+<code-block>composer create-project codeigniter4/appstarter siakad
+composer create-project codeigniter4/appstarter toko-online
+</code-block>
+
+<step n="2">Konfigurasi .env</step>
+<p>File <code>env</code> disalin menjadi <code>.env</code>, lalu baseURL, environment, dan koneksi database diatur. CSRF diaktifkan secara global di <code>app/Config/Filters.php</code> sehingga setiap form wajib membawa <code>csrf_field()</code>.</p>
+<code-block>CI_ENVIRONMENT = development
+app.baseURL = 'http://localhost:8080/'
+
+database.default.hostname = localhost
+database.default.database = ci_siakad
+database.default.username = root
+database.default.password =
+database.default.DBDriver = MySQLi
+database.default.port = 3306
+</code-block>
+
+<step n="3">Membuat Database dengan Migration dan Seeder</step>
+<p>Skema tabel ditulis sebagai <b>migration</b> agar bisa dibuat ulang di komputer mana pun. Data awal (akun admin, dosen, mahasiswa, dan matakuliah) diisi lewat <b>seeder</b>.</p>
+<code-block>CREATE DATABASE ci_siakad;
+php spark migrate
+php spark db:seed SiakadSeeder
+</code-block>
+
+<step n="4">Running Aplikasi</step>
+<p>Di XAMPP ekstensi <code>intl</code> (wajib untuk CI4) tidak aktif secara default. Perintah <code>php spark serve</code> menjalankan proses PHP baru tanpa opsi tambahan, jadi server dijalankan dengan <code>serve.bat</code> yang memanggil built-in server PHP secara langsung:</p>
+<code-block>@echo off
+rem Jalankan dev server dengan ekstensi intl
+cd /d %~dp0
+C:\xampp\php\php.exe -d extension=intl -S localhost:%1 -t public vendor\codeigniter4\framework\system\rewrite.php
+</code-block>
+<code-block>siakad\serve.bat 8080        -> http://localhost:8080
+toko-online\serve.bat 8081   -> http://localhost:8081
+</code-block>
+<p>Seluruh source code tersimpan di repository GitHub <a href="https://github.com/MathiasAdya/pbkk-codeigniter4" target="_blank">MathiasAdya/pbkk-codeigniter4</a> (publik). Folder <code>vendor/</code> dan file <code>.env</code> tidak ikut di-commit, sehingga setelah clone perlu dijalankan:</p>
+<code-block>git clone https://github.com/MathiasAdya/pbkk-codeigniter4.git
+cd pbkk-codeigniter4/siakad      # atau toko-online
+composer install
+copy env .env                    # atur baseURL dan database
+php spark migrate
+php spark db:seed SiakadSeeder   # toko-online: TokoSeeder
+</code-block>
+<p>Akun untuk mencoba aplikasi:</p>
+<table>
+<tr class="h"><th>Aplikasi</th><th>Role</th><th>Username / Password</th></tr>
+<tr><td>SIAKAD</td><td>Admin</td><td><code>admin</code> / <code>admin123</code></td></tr>
+<tr><td>SIAKAD</td><td>Dosen</td><td>NIDN / NIDN, contoh <code>0011223301</code></td></tr>
+<tr><td>SIAKAD</td><td>Mahasiswa</td><td>NRP / NRP, contoh <code>5025231015</code></td></tr>
+<tr><td>Toko Online</td><td>Admin</td><td><code>admin</code> / <code>admin123</code></td></tr>
+<tr><td>Toko Online</td><td>Customer</td><td><code>budi</code> / <code>budi123</code> (atau daftar akun baru di <code>/register</code>)</td></tr>
+</table>
+
+<step n="5">Kendala dan Solusi</step>
+<table>
+<tr class="h"><th>Kendala</th><th>Penyebab</th><th>Solusi</th></tr>
+<tr><td>Error <i>"The framework needs the following extension(s) installed and loaded: intl"</i></td><td>Ekstensi intl tidak aktif di php.ini bawaan XAMPP.</td><td>Menjalankan PHP dengan <code>-d extension=intl</code>.</td></tr>
+<tr><td><code>php spark serve</code> tetap gagal</td><td>spark menjalankan proses PHP baru tanpa opsi <code>-d</code>.</td><td>Membuat <code>serve.bat</code> yang menjalankan <code>php -S</code> langsung dengan <code>rewrite.php</code>.</td></tr>
+<tr><td>Semua relasi ikut terhapus (CASCADE), padahal seharusnya RESTRICT atau SET NULL</td><td>Urutan argumen <code>addForeignKey()</code> tertukar.</td><td>Urutan yang benar adalah <code>addForeignKey($field, $table, $col, $onUpdate, $onDelete)</code>. onUpdate ditulis lebih dulu.</td></tr>
+<tr><td>Error 500 <i>"Call to undefined function user()"</i> di halaman KRS/Nilai</td><td>Helper dimuat di <code>initController()</code>, yang dipanggil setelah <code>__construct()</code>.</td><td>Helper <code>siakad</code> di-autoload lewat <code>Config/Autoload::$helpers</code>.</td></tr>
+<tr><td>Validasi gambar gagal di server tanpa GD</td><td>Ekstensi GD tidak tersedia.</td><td>Validasi cukup memakai <code>is_image</code>, <code>mime_in</code>, dan <code>max_size</code>, tanpa resize gambar.</td></tr>
+<tr><td>Error 500 saat menghapus kategori yang masih memiliki produk</td><td>FK <code>RESTRICT</code> membuat MariaDB menolak DELETE dan CI4 melempar <code>DatabaseException</code>.</td><td>Exception ditangkap di controller dan diganti pesan <i>"Kategori tidak dapat dihapus karena masih memiliki produk."</i></td></tr>
+<tr><td>Total pendapatan di dashboard selalu kosong</td><td><code>selectSum()</code> pada Model bercampur dengan select bawaan model.</td><td>Query dijalankan lewat <code>$model-&gt;builder()-&gt;selectSum('total')-&gt;get()-&gt;getRowArray()</code>.</td></tr>
+<tr><td>Stok bisa minus jika dua pelanggan checkout bersamaan</td><td>Stok dicek lalu dikurangi di dua query terpisah tanpa penguncian.</td><td>Checkout dijalankan dalam transaksi dengan <code>SELECT ... FOR UPDATE</code>; jumlah di keranjang juga dibatasi stok.</td></tr>
+</table>
+
+<h2>Bagian 2: Aplikasi SIAKAD</h2>
+
+<step n="1">Merancang Database</step>
+<p>Akun login semua role disimpan di tabel <code>users</code>, sedangkan data profil disimpan di tabel <code>dosen</code> dan <code>mahasiswa</code> yang terhubung lewat <code>user_id</code>. Tabel <code>krs</code> menyimpan matakuliah yang diambil mahasiswa per tahun ajaran beserta nilainya.</p>
+<code-block>users 1 ── 1 dosen        (user_id, ON DELETE CASCADE)
+users 1 ── 1 mahasiswa    (user_id, ON DELETE CASCADE)
+dosen 1 ── N mahasiswa    (dosen_wali_id, ON DELETE SET NULL)
+dosen 1 ── N matakuliah   (dosen_id, ON DELETE SET NULL)
+mahasiswa 1 ── N krs N ── 1 matakuliah
+              (CASCADE)        (RESTRICT: matakuliah yang sudah diambil tidak bisa dihapus)
+</code-block>
+<code-block>// app/Database/Migrations/2026-11-04-000001_CreateSiakadTables.php
+$this->forge->addForeignKey('mahasiswa_id', 'mahasiswa', 'id', 'CASCADE', 'CASCADE');
+$this->forge->addForeignKey('matakuliah_id', 'matakuliah', 'id', 'CASCADE', 'RESTRICT');
+$this->forge->addUniqueKey(['mahasiswa_id', 'matakuliah_id', 'tahun_ajaran']);
+$this->forge->createTable('krs');
+</code-block>
+
+<step n="2">Router dan Controller</step>
+<p>Route dikelompokkan per role. Setiap group diberi filter, sehingga controller tidak perlu memeriksa hak akses sendiri. Route CRUD admin dibuat dengan perulangan agar tiga master data memakai pola URL yang sama.</p>
+<code-block>$routes->get('/', 'Home::index');
+$routes->get('login', 'Auth::login');
+$routes->post('login', 'Auth::attempt');
+$routes->get('logout', 'Auth::logout');
+$routes->get('dashboard', 'Dashboard::index', ['filter' => 'auth']);
+
+// Admin: CRUD master data
+$routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => 'auth:admin'], static function ($routes) {
+    foreach (['mahasiswa' => 'Mahasiswa', 'dosen' => 'Dosen', 'matakuliah' => 'Matakuliah'] as $uri => $controller) {
+        $routes->get($uri, "{$controller}::index");
+        $routes->get("{$uri}/new", "{$controller}::new");
+        $routes->post($uri, "{$controller}::create");
+        $routes->get("{$uri}/(:num)/edit", "{$controller}::edit/$1");
+        $routes->post("{$uri}/(:num)", "{$controller}::update/$1");
+        $routes->post("{$uri}/(:num)/delete", "{$controller}::delete/$1");
+    }
+});
+
+// Mahasiswa: KRS & KHS
+$routes->group('', ['filter' => 'auth:mahasiswa'], static function ($routes) {
+    $routes->get('krs', 'Krs::index');
+    $routes->post('krs', 'Krs::ambil');
+    $routes->post('krs/(:num)/delete', 'Krs::drop/$1');
+    $routes->get('khs', 'Krs::khs');
+});
+
+// Dosen: input nilai
+$routes->group('nilai', ['filter' => 'auth:dosen'], static function ($routes) {
+    $routes->get('/', 'Nilai::index');
+    $routes->get('(:num)', 'Nilai::show/$1');
+    $routes->post('(:num)', 'Nilai::save/$1');
+});
+</code-block>
+<p>Aksi hapus dan ubah memakai POST, bukan GET, sehingga selalu dilindungi token CSRF.</p>
+
+<step n="3">View Bootstrap dan Template SB Admin 2</step>
+<p>Halaman beranda dan login memakai Bootstrap. Halaman setelah login memakai layout <code>layouts/admin.php</code> berbasis <b>SB Admin 2</b> (CSS/JS dari CDN jsDelivr). View lain cukup meng-<i>extend</i> layout tersebut dan mengisi section <code>content</code>. Menu sidebar (<code>layouts/_sidebar.php</code>) ditampilkan sesuai role yang login, dan pesan flashdata ditampilkan oleh <code>layouts/_alerts.php</code>.</p>
+<code-block>&lt;!-- app/Views/admin/mahasiswa/index.php --&gt;
+&lt;?= $this-&gt;extend('layouts/admin') ?&gt;
+&lt;?= $this-&gt;section('content') ?&gt;
+  ... tabel data, form pencarian, $pager-&gt;links() ...
+&lt;?= $this-&gt;endSection() ?&gt;
+</code-block>
+
+<step n="4">Model dan CRUD</step>
+<p>Setiap tabel punya Model dengan <code>$allowedFields</code> (melindungi dari mass assignment), <code>$validationRules</code>, dan timestamp otomatis. Password di-hash otomatis lewat callback <code>beforeInsert</code> dan <code>beforeUpdate</code>:</p>
+<code-block>class UserModel extends Model
+{
+    protected $table         = 'users';
+    protected $allowedFields = ['username', 'password', 'nama', 'role'];
+    protected $beforeInsert  = ['hashPassword'];
+    protected $beforeUpdate  = ['hashPassword'];
+
+    protected function hashPassword(array $data): array
+    {
+        if (! empty($data['data']['password'])) {
+            $data['data']['password'] = password_hash($data['data']['password'], PASSWORD_DEFAULT);
+        } else {
+            unset($data['data']['password']);
+        }
+        return $data;
+    }
+
+    public function attempt(string $username, string $password): ?array
+    {
+        $user = $this->where('username', $username)->first();
+        return ($user && password_verify($password, $user['password'])) ? $user : null;
+    }
+}
+</code-block>
+<p>Saat admin menambah dosen atau mahasiswa, akun login di <code>users</code> dan profilnya dibuat dalam satu transaksi database (trait <code>HasUserAccount</code>). Username dan password awal sama dengan NIDN/NRP. Halaman daftar dilengkapi pencarian dan paginasi (<code>paginate(10)</code>). Matakuliah yang sudah ada di KRS tidak bisa dihapus karena FK RESTRICT, dan admin mendapat pesan error yang jelas.</p>
+
+<step n="5">Upload Foto Mahasiswa</step>
+<p>Form mahasiswa memakai <code>form_open_multipart()</code>. File divalidasi (gambar, maks 1 MB, JPEG/PNG/WEBP), lalu disimpan dengan nama acak ke <code>public/uploads/foto/</code>. Foto lama dihapus saat diganti atau saat data dihapus.</p>
+<code-block>private const FOTO_RULE = 'is_image[foto]|max_size[foto,1024]|mime_in[foto,image/jpeg,image/png,image/webp]';
+
+public function create()
+{
+    $data = $this->input();
+    if (! $this->model->validate($data) || ! $this->validate(['foto' => 'uploaded[foto]|' . self::FOTO_RULE])) {
+        return $this->back();
+    }
+    $data['foto'] = $this->storeFoto($this->request->getFile('foto'));
+    ...
+}
+
+private function storeFoto(UploadedFile $file): string
+{
+    $name = $file->getRandomName();
+    $file->move(self::FOTO_DIR, $name);
+    return $name;
+}
+</code-block>
+
+<step n="6">Hak Akses User dengan Filter</step>
+<p>Login menyimpan <code>logged_in</code>, <code>role</code>, dan data user ke session, setelah ID session diganti (<code>session()-&gt;regenerate()</code>) untuk mencegah session fixation. <code>AuthFilter</code> menerima argumen role dari route, misalnya <code>auth:admin</code>:</p>
+<code-block>class AuthFilter implements FilterInterface
+{
+    public function before(RequestInterface $request, $arguments = null)
+    {
+        $session = session();
+
+        if (! $session->get('logged_in')) {
+            return redirect()->to('/login')->with('error', 'Silakan login terlebih dahulu.');
+        }
+
+        if (! empty($arguments) && ! in_array($session->get('role'), $arguments, true)) {
+            return redirect()->to('/dashboard')->with('error', 'Anda tidak memiliki akses ke halaman tersebut.');
+        }
+    }
+}
+</code-block>
+<code-block>// app/Config/Filters.php
+public array $aliases = [
+    ...
+    'auth' => \App\Filters\AuthFilter::class,
+];
+</code-block>
+
+<step n="7">KRS dan KHS Mahasiswa</step>
+<p>Mahasiswa memilih matakuliah untuk semester berjalan (<code>2026/2027 Ganjil</code>). Model menolak matakuliah yang sudah diambil dan total SKS yang melebihi 24. Pembatalan hanya berlaku untuk KRS milik sendiri, pada semester berjalan, yang belum dinilai. Syarat ini ditulis langsung di query DELETE, sehingga mahasiswa lain tidak bisa membatalkan KRS orang lain dengan mengganti ID.</p>
+<code-block>public function ambil(int $mahasiswaId, array $matakuliah): ?string
+{
+    $krs = $this->forMahasiswa($mahasiswaId);
+
+    if (in_array($matakuliah['id'], array_column($krs, 'matakuliah_id'))) {
+        return 'Matakuliah sudah ada di KRS.';
+    }
+    if (array_sum(array_column($krs, 'sks')) + $matakuliah['sks'] > self::MAX_SKS) {
+        return 'Total SKS melebihi batas ' . self::MAX_SKS . ' SKS.';
+    }
+    $this->insert([...]);
+    return null;
+}
+
+// Controller Krs::drop
+$this->krs->where([
+    'id'           => $id,
+    'mahasiswa_id' => $this->mahasiswa['id'],
+    'tahun_ajaran' => KrsModel::TAHUN_AJARAN,
+])->where('nilai', null)->delete();
+</code-block>
+<p>KHS mengelompokkan nilai per tahun ajaran. IP dan IPK dihitung oleh helper <code>hitung_ip()</code> dengan bobot A=4, AB=3,5, B=3, BC=2,5, C=2, D=1, E=0. Matakuliah yang belum dinilai tidak ikut dihitung.</p>
+
+<step n="8">Input Nilai oleh Dosen</step>
+<p>Dosen hanya melihat matakuliah yang diampunya. Membuka matakuliah dosen lain (misalnya <code>/nilai/2</code>) menghasilkan 404. Nilai seluruh peserta disimpan sekaligus dari satu form, dan setiap nilai divalidasi terhadap daftar huruf yang sah.</p>
+
+<h2>Bagian 3: Aplikasi Toko Online</h2>
+<step n="1">Merancang Database</step>
+<p>Akun admin dan pelanggan disimpan di tabel <code>users</code> dengan kolom <code>role</code>. Setiap pesanan (<code>orders</code>) memiliki banyak <code>order_items</code>, dan setiap item menyimpan <b>harga saat dibeli</b> (snapshot) sehingga perubahan harga produk tidak mengubah pesanan lama.</p>
+<code-block>kategori 1 ── N produk        (kategori_id, RESTRICT: kategori berisi produk tidak bisa dihapus)
+users    1 ── N orders        (user_id, CASCADE)
+orders   1 ── N order_items   (order_id, CASCADE)
+produk   1 ── N order_items   (produk_id, RESTRICT: produk yang pernah dipesan tidak bisa dihapus)
+</code-block>
+<code-block>// app/Database/Migrations/2026-11-04-000001_CreateTokoTables.php
+// addForeignKey(field, table, column, onUpdate, onDelete)
+$this->forge->addForeignKey('kategori_id', 'kategori', 'id', 'CASCADE', 'RESTRICT');
+$this->forge->createTable('produk');
+...
+$this->forge->addForeignKey('order_id', 'orders', 'id', 'CASCADE', 'CASCADE');
+$this->forge->addForeignKey('produk_id', 'produk', 'id', 'CASCADE', 'RESTRICT');
+$this->forge->createTable('order_items');
+</code-block>
+
+<step n="2">Router dan Filter Hak Akses</step>
+<p>Etalase dan keranjang bersifat publik. Checkout dan riwayat pesanan hanya untuk role <code>customer</code>, sedangkan panel admin memakai filter <code>auth:admin</code>. Filter yang sama (<code>AuthFilter</code>) dipakai seperti di SIAKAD: belum login diarahkan ke <code>/login</code>, role yang salah diarahkan ke beranda dengan pesan <i>"Anda tidak memiliki akses ke halaman tersebut."</i></p>
+<code-block>$routes->get('/', 'Toko::index');
+$routes->get('produk/(:num)', 'Toko::detail/$1');
+
+// Keranjang (session, boleh tanpa login)
+$routes->get('keranjang', 'Keranjang::index');
+$routes->post('keranjang/tambah', 'Keranjang::tambah');
+$routes->post('keranjang/update', 'Keranjang::update');
+$routes->post('keranjang/hapus/(:num)', 'Keranjang::hapus/$1');
+
+// Customer: checkout & pesanan
+$routes->group('', ['filter' => 'auth:customer'], static function ($routes) {
+    $routes->get('checkout', 'Checkout::index');
+    $routes->post('checkout', 'Checkout::proses');
+    $routes->get('pesanan', 'Pesanan::index');
+    $routes->get('pesanan/(:num)', 'Pesanan::show/$1');
+    $routes->post('pesanan/(:num)/batal', 'Pesanan::batal/$1');
+});
+
+// Admin: dashboard, CRUD kategori & produk, kelola pesanan
+$routes->group('admin', ['namespace' => 'App\Controllers\Admin', 'filter' => 'auth:admin'], static function ($routes) {
+    $routes->get('/', 'Dashboard::index');
+    foreach (['kategori' => 'Kategori', 'produk' => 'Produk'] as $uri => $controller) {
+        // index, new, create, edit, update, delete (pola sama dengan SIAKAD)
+    }
+    $routes->get('pesanan', 'Pesanan::index');
+    $routes->get('pesanan/(:num)', 'Pesanan::show/$1');
+    $routes->post('pesanan/(:num)/status', 'Pesanan::status/$1');
+});
+</code-block>
+
+<step n="3">Katalog Produk</step>
+<p>Beranda menampilkan produk dalam kartu Bootstrap dengan filter kategori, pencarian nama, dan paginasi 9 produk per halaman. Query dibangun di <code>ProdukModel::daftar()</code> sehingga dipakai juga oleh halaman produk admin.</p>
+<code-block>public function index(): string
+{
+    $q        = trim((string) $this->request->getGet('q'));
+    $kategori = (int) $this->request->getGet('kategori');
+    $model    = model(ProdukModel::class);
+
+    return view('toko/index', [
+        'produk'   => $model->daftar($q, $kategori)->paginate(9),
+        'pager'    => $model->pager,
+        'kategori' => model(KategoriModel::class)->orderBy('nama')->findAll(),
+        ...
+    ]);
+}
+</code-block>
+
+<step n="4">Keranjang Belanja (Session)</step>
+<p>Keranjang disimpan di session dalam bentuk <code>[produk_id =&gt; qty]</code> melalui library <code>App\Libraries\Cart</code>, sehingga pengunjung bisa berbelanja sebelum login. Jumlah selalu dibatasi stok yang tersedia.</p>
+<code-block>public function add(int $id, int $qty): ?string
+{
+    $produk = model(ProdukModel::class)->find($id);
+    if (! $produk) {
+        return 'Produk tidak ditemukan.';
+    }
+    if ($produk['stok'] < 1) {
+        return 'Stok produk habis.';
+    }
+
+    $cart      = $this->raw();
+    $baru      = ($cart[$id] ?? 0) + max(1, $qty);
+    $cart[$id] = min($baru, (int) $produk['stok']);
+    session()->set(self::KEY, $cart);
+
+    return $baru > $produk['stok'] ? 'Jumlah dibatasi sesuai stok tersedia (' . $produk['stok'] . ').' : null;
+}
+</code-block>
+
+<step n="5">Checkout dalam Satu Transaksi</step>
+<p>Stok bisa berubah antara saat produk dimasukkan ke keranjang dan saat checkout, misalnya karena pelanggan lain membeli produk yang sama. Karena itu <code>OrderModel::buat()</code> mengunci baris produk dengan <code>SELECT ... FOR UPDATE</code>, memeriksa stok, menguranginya, lalu menyimpan order dan item dalam satu transaksi. Bila satu item gagal, semua perubahan di-rollback.</p>
+<code-block>$db->transBegin();
+try {
+    foreach ($items as $item) {
+        $p = $db->query('SELECT id, nama, harga, stok FROM produk WHERE id = ? FOR UPDATE', [$item['id']])->getRowArray();
+        if ($p['stok'] < $item['qty']) {
+            throw new RuntimeException("Stok \"{$p['nama']}\" tidak mencukupi (tersisa {$p['stok']}).");
+        }
+        $total  += $p['harga'] * $item['qty'];
+        $baris[] = ['produk_id' => $p['id'], 'qty' => $item['qty'], 'harga' => $p['harga']];
+        $db->query('UPDATE produk SET stok = stok - ? WHERE id = ?', [$item['qty'], $p['id']]);
+    }
+    $orderId = $this->insert(['user_id' => $userId, 'total' => $total, 'alamat' => $alamat, 'status' => 'pending'], true);
+    foreach ($baris as $b) {
+        model(OrderItemModel::class)->insert($b + ['order_id' => $orderId]);
+    }
+    $db->transCommit();
+} catch (\Throwable $e) {
+    $db->transRollback();
+    throw $e;
+}
+</code-block>
+<p>Controller <code>Checkout::proses()</code> memvalidasi alamat, memanggil <code>buat()</code>, mengosongkan keranjang, lalu mengarahkan ke detail pesanan dengan pesan <i>"Pesanan berhasil dibuat."</i></p>
+
+<step n="6">Riwayat dan Pembatalan Pesanan</step>
+<p>Pelanggan hanya melihat pesanan miliknya (<code>withPelanggan($userId)</code>). Pesanan berstatus <code>pending</code> dapat dibatalkan, dan pembatalan mengembalikan stok produk di dalam transaksi yang sama.</p>
+<code-block>if ($status === 'batal') {
+    foreach (model(OrderItemModel::class)->where('order_id', $id)->findAll() as $it) {
+        $db->query('UPDATE produk SET stok = stok + ? WHERE id = ?', [$it['qty'], $it['produk_id']]);
+    }
+}
+$this->update($id, ['status' => $status]);
+</code-block>
+
+<step n="7">Panel Admin: CRUD Kategori dan Produk dengan Upload Gambar</step>
+<p>Dashboard admin menampilkan jumlah produk, pesanan, pelanggan, dan total pendapatan (pesanan berstatus dibayar, dikirim, atau selesai). CRUD produk menerima gambar JPG/PNG/WEBP maksimal 2 MB yang disimpan ke <code>public/uploads/produk</code> dengan nama acak. Gambar lama dihapus saat diganti. Penghapusan yang melanggar FK RESTRICT ditangkap dan ditampilkan sebagai pesan.</p>
+<code-block>private const GAMBAR_RULE = 'is_image[gambar]|mime_in[gambar,image/jpeg,image/png,image/webp]|max_size[gambar,2048]';
+
+public function delete(int $id)
+{
+    $row = $this->findOr404($id);
+    try {
+        $this->model->delete($id);
+    } catch (DatabaseException) {
+        // FK order_items -> produk bersifat RESTRICT
+        return redirect()->to('/admin/produk')->with('error', 'Produk tidak dapat dihapus karena sudah pernah dipesan.');
+    }
+    $this->hapusFile($row['gambar']);
+    return redirect()->to('/admin/produk')->with('success', 'Produk dihapus.');
+}
+</code-block>
+
+<step n="8">Pengelolaan Status Pesanan</step>
+<p>Admin mengubah status pesanan melalui alur <code>pending → dibayar → dikirim → selesai</code>, atau <code>batal</code>. Status <code>batal</code> bersifat final: pesanan yang sudah dibatalkan tidak bisa diubah lagi, sehingga stok tidak dikembalikan dua kali.</p>
+
+<h2>Pembagian Tugas Kelompok</h2>
+<p>Tugas ini dikerjakan secara individu, dengan pembagian pekerjaan sebagai berikut:</p>
+<table>
+<tr class="h"><th>Anggota</th><th>Area</th><th>Pekerjaan</th></tr>
+<tr><td><b>Mathias</b> (5025231015)</td><td>SIAKAD</td><td>Instalasi CI4, desain database dan migration, autentikasi dan filter role, CRUD master data, upload foto, KRS/KHS, input nilai, pengujian.</td></tr>
+<tr><td><b>Mathias</b> (5025231015)</td><td>Toko Online</td><td>Desain database, katalog dan kategori, keranjang, checkout, riwayat pesanan, panel admin, upload gambar produk, pengujian.</td></tr>
+<tr><td><b>Mathias</b> (5025231015)</td><td>Dokumentasi</td><td>Screenshot hasil dan penulisan laporan.</td></tr>
+</table>
+
+<h2>Alur Data</h2>
+<p>Sebagai contoh, berikut alur data saat mahasiswa mengambil matakuliah di halaman KRS:</p>
+<code-block>Mahasiswa klik "Ambil" di krs/index.php (form POST + csrf_field)
+      │  POST /krs  matakuliah_id=4
+      ▼
+Filter global CSRF  ──(token salah)──► error 403
+      │
+Filter auth:mahasiswa (AuthFilter)
+      │  belum login ─► /login      role lain ─► /dashboard + pesan "tidak memiliki akses"
+      ▼
+Router: Krs::ambil   (konstruktor: user('id') ─► MahasiswaModel::findByUser)
+      │  MatakuliahModel::find(4)
+      ▼
+KrsModel::ambil(mahasiswaId, matakuliah)
+      │  cek duplikat ─► "Matakuliah sudah ada di KRS."
+      │  cek total SKS > 24 ─► "Total SKS melebihi batas"
+      │  INSERT krs (tahun_ajaran = 2026/2027 Ganjil)
+      ▼
+redirect('/krs')->with('success', ...)  ─► flashdata ditampilkan layouts/_alerts.php
+</code-block>
+
+<h3>Tanggung jawab tiap file</h3>
+<table>
+<tr class="h"><th>File</th><th>Tanggung jawab</th></tr>
+<tr><td><code>app/Config/Routes.php</code></td><td>Memetakan URL ke controller dan memasang filter per group role.</td></tr>
+<tr><td><code>app/Config/Filters.php</code></td><td>Mendaftarkan alias <code>auth</code> dan mengaktifkan CSRF global.</td></tr>
+<tr><td><code>app/Config/Autoload.php</code></td><td>Autoload helper <code>siakad</code> (<code>user()</code>, <code>hitung_ip()</code>).</td></tr>
+<tr><td><code>app/Filters/AuthFilter.php</code></td><td>Cek login dan role sebelum controller dijalankan.</td></tr>
+<tr><td><code>app/Controllers/Auth.php</code></td><td>Login, logout, dan pengisian session.</td></tr>
+<tr><td><code>app/Controllers/Admin/*.php</code></td><td>CRUD mahasiswa (dengan upload foto), dosen, dan matakuliah.</td></tr>
+<tr><td><code>app/Controllers/Krs.php</code></td><td>KRS (ambil/batal) dan KHS mahasiswa.</td></tr>
+<tr><td><code>app/Controllers/Nilai.php</code></td><td>Daftar matakuliah dosen dan input nilai peserta.</td></tr>
+<tr><td><code>app/Models/*.php</code></td><td>Akses tabel, validasi, join, dan aturan bisnis (KRS, hash password, akun + profil dalam satu transaksi).</td></tr>
+<tr><td><code>app/Database/Migrations, Seeds</code></td><td>Skema tabel dengan FK, serta data awal.</td></tr>
+<tr><td><code>app/Views/layouts/*.php</code></td><td>Layout SB Admin 2, sidebar per role, dan alert flashdata.</td></tr>
+<tr><td><code>toko-online/app/Libraries/Cart.php</code></td><td>Keranjang berbasis session, jumlah dibatasi stok.</td></tr>
+<tr><td><code>toko-online/app/Models/OrderModel.php</code></td><td>Checkout dalam transaksi (FOR UPDATE), perubahan status, dan pengembalian stok saat batal.</td></tr>
+<tr><td><code>toko-online/app/Controllers/Keranjang.php, Checkout.php, Pesanan.php</code></td><td>Alur belanja pelanggan: keranjang, checkout, riwayat dan pembatalan pesanan.</td></tr>
+<tr><td><code>toko-online/app/Controllers/Admin/*.php</code></td><td>Dashboard, CRUD kategori dan produk (upload gambar), serta pengelolaan status pesanan.</td></tr>
+</table>
+
+<h2>Kesimpulan</h2>
+<ul>
+<li>CodeIgniter 4 memisahkan tanggung jawab dengan jelas: <b>Router</b> memetakan URL, <b>Filter</b> menangani login, role, dan CSRF, <b>Controller</b> mengatur alur, <b>Model</b> menyimpan aturan data, dan <b>View</b> hanya menampilkan.</li>
+<li>Hak akses cukup ditulis sekali di <code>AuthFilter</code> dan dipasang per route group, sehingga tidak ada pengecekan role yang tersebar di controller.</li>
+<li>Migration, seeder, dan foreign key (CASCADE, SET NULL, RESTRICT) membuat database mudah dibuat ulang sekaligus menjaga integritas data, misalnya matakuliah yang sudah diambil tidak bisa dihapus.</li>
+<li>Fitur bawaan seperti validasi, <code>UploadedFile</code>, paginasi, flashdata, dan query builder membuat CRUD dan upload file cepat dibuat sekaligus aman.</li>
+<li>Kedua aplikasi (SIAKAD dan Toko Online) sudah diuji untuk setiap role, termasuk kasus gagal: login salah, akses ditolak, KRS duplikat, pembatalan KRS milik orang lain, stok tidak mencukupi, dan penghapusan data yang masih dipakai.</li>
+<li>Untuk data yang diperebutkan seperti stok, transaksi database dengan <code>SELECT ... FOR UPDATE</code> menjamin stok tidak pernah minus dan pesanan tersimpan utuh atau tidak sama sekali.</li>
+</ul>
+
+<h2>Hasil (Foto)</h2>
+<h3>SIAKAD</h3>
+<fig src="screenshots/siakad-01-home.png" cap="Gambar 1. Halaman beranda SIAKAD"/>
+<fig src="screenshots/siakad-02-login.png" cap="Gambar 2. Halaman login"/>
+<fig src="screenshots/siakad-03-login-gagal.png" cap="Gambar 3. Login gagal (username/password salah)"/>
+<fig src="screenshots/siakad-04-admin-dashboard.png" cap="Gambar 4. Dashboard admin (SB Admin 2)"/>
+<fig src="screenshots/siakad-05-admin-mahasiswa.png" cap="Gambar 5. Data mahasiswa dengan foto, pencarian, dan paginasi"/>
+<fig src="screenshots/siakad-06-admin-mahasiswa-form.png" cap="Gambar 6. Form edit mahasiswa dengan upload foto"/>
+<fig src="screenshots/siakad-07-admin-dosen.png" cap="Gambar 7. Data dosen"/>
+<fig src="screenshots/siakad-08-admin-matakuliah.png" cap="Gambar 8. Data matakuliah"/>
+<fig src="screenshots/siakad-09-admin-restrict.png" cap="Gambar 9. Matakuliah yang sudah ada di KRS tidak bisa dihapus (FK RESTRICT)"/>
+<fig src="screenshots/siakad-10-mhs-dashboard.png" cap="Gambar 10. Dashboard mahasiswa"/>
+<fig src="screenshots/siakad-11-mhs-krs.png" cap="Gambar 11. Pengisian KRS"/>
+<fig src="screenshots/siakad-12-mhs-khs.png" cap="Gambar 12. KHS dengan IP dan IPK"/>
+<fig src="screenshots/siakad-13-akses-ditolak.png" cap="Gambar 13. Mahasiswa membuka halaman admin, akses ditolak"/>
+<fig src="screenshots/siakad-14-dosen-dashboard.png" cap="Gambar 14. Dashboard dosen"/>
+<fig src="screenshots/siakad-15-dosen-nilai.png" cap="Gambar 15. Daftar matakuliah yang diampu dosen"/>
+<fig src="screenshots/siakad-16-dosen-input-nilai.png" cap="Gambar 16. Input nilai peserta"/>
+<h3>Toko Online</h3>
+<fig src="screenshots/toko-01-katalog.png" cap="Gambar 17. Katalog produk (beranda)"/>
+<fig src="screenshots/toko-02-filter-kategori.png" cap="Gambar 18. Filter produk per kategori"/>
+<fig src="screenshots/toko-03-detail-produk.png" cap="Gambar 19. Detail produk dengan gambar hasil upload"/>
+<fig src="screenshots/toko-04-login.png" cap="Gambar 20. Halaman login"/>
+<fig src="screenshots/toko-05-register.png" cap="Gambar 21. Halaman registrasi pelanggan"/>
+<fig src="screenshots/toko-06-keranjang-clamp.png" cap="Gambar 22. Keranjang: jumlah dibatasi sesuai stok"/>
+<fig src="screenshots/toko-07-checkout.png" cap="Gambar 23. Halaman checkout"/>
+<fig src="screenshots/toko-08-checkout-sukses.png" cap="Gambar 24. Checkout berhasil, pesanan dibuat"/>
+<fig src="screenshots/toko-09-pesanan-saya.png" cap="Gambar 25. Riwayat pesanan pelanggan"/>
+<fig src="screenshots/toko-10-akses-ditolak.png" cap="Gambar 26. Pelanggan membuka halaman admin, akses ditolak"/>
+<fig src="screenshots/toko-11-admin-dashboard.png" cap="Gambar 27. Dashboard admin"/>
+<fig src="screenshots/toko-12-admin-kategori.png" cap="Gambar 28. Data kategori"/>
+<fig src="screenshots/toko-13-admin-kategori-restrict.png" cap="Gambar 29. Kategori yang masih memiliki produk tidak bisa dihapus (FK RESTRICT)"/>
+<fig src="screenshots/toko-14-admin-produk.png" cap="Gambar 30. Data produk"/>
+<fig src="screenshots/toko-15-admin-produk-form.png" cap="Gambar 31. Form produk dengan upload gambar"/>
+<fig src="screenshots/toko-16-admin-pesanan.png" cap="Gambar 32. Data pesanan untuk admin"/>

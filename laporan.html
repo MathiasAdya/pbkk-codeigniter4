@@ -1,0 +1,492 @@
+<p>&nbsp;</p>
+
+<h1 style="text-align: center;">Pengenalan Framework CodeIgniter 4: SIAKAD dan Toko Online</h1>
+
+<div style="background-color: #f8f9fa; border-radius: 10px; border: 1px solid rgb(226, 232, 240); margin: 20px auto; max-width: 480px; padding: 16px 24px; text-align: center;">
+  <p style="margin: 0px;"><b>Nama:</b> Mathias Adya Diwangkara Suganda<br /><b>NRP:</b> 5025231015<br /><b>Kelas:</b> Pemrograman Berbasis Kerangka Kerja (D)</p></div><div><br /></div>
+<div><b>Kode:</b> folder <code>siakad/</code> dan <code>toko-online/</code> (CodeIgniter 4.7.6)</div>
+<div><b>Source code (GitHub):&nbsp;<a href="https://github.com/MathiasAdya/pbkk-codeigniter4" target="_blank">github.com/MathiasAdya/pbkk-codeigniter4</a></b></div>
+<div><b>Referensi:&nbsp;<a href="https://fajarbaskoro.blogspot.com/2019/02/pbkk-2-pengenalan-framework-code-igniter.html" target="_blank">[LINK]</a></b></div><div><br /></div>
+
+<!--══════════════════════════════════════════════════-->
+<h2 style="border-left: 5px solid rgb(190, 242, 100); padding-left: 12px;">Soal: Latihan 1 dan Latihan 2</h2>
+<p><b>Latihan 1</b> meminta penerapan materi pengenalan CodeIgniter. Setiap topik dikerjakan di dalam aplikasi Latihan 2:</p>
+<table style="border-collapse: collapse; margin: 10px 0px; width: 100%;"><tbody>
+<tr style="background-color: #bef264; color: #1e1f22;"><th style="border: 1px solid rgb(226, 232, 240); padding: 8px;">No</th><th style="border: 1px solid rgb(226, 232, 240); padding: 8px;">Topik Latihan 1</th><th style="border: 1px solid rgb(226, 232, 240); padding: 8px;">Penerapan</th></tr>
+<tr><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;">1</td><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;">Instalasi dan konfigurasi CI</td><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;">Instalasi CI 4.7.6 lewat Composer, konfigurasi <code>.env</code> (baseURL, database), migration dan seeder (Bagian 1).</td></tr>
+<tr><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;">2</td><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;">Router dan Controller</td><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;"><code>app/Config/Routes.php</code> dengan route group, namespace <code>Admin</code>, parameter <code>(:num)</code>, filter per group.</td></tr>
+<tr><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;">3</td><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;">View Bootstrap</td><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;">Halaman publik dan form login memakai Bootstrap 4, view dipecah menjadi layout dan partial.</td></tr>
+<tr><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;">4</td><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;">SB Admin</td><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;">Layout <code>layouts/admin.php</code> memakai template <b>SB Admin 2</b>: sidebar per role, topbar, card, dan tabel.</td></tr>
+<tr><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;">5</td><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;">Model dan CRUD</td><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;">Model CI4 dengan validasi, query builder, join, dan paginasi. CRUD lengkap untuk master data.</td></tr>
+<tr><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;">6</td><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;">File upload</td><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;">Upload foto mahasiswa dan gambar produk dengan validasi <code>is_image</code>, <code>max_size</code>, dan <code>mime_in</code>.</td></tr>
+<tr><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;">7</td><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;">Hak akses user</td><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;">Login dengan password ter-hash, session, dan <code>AuthFilter</code> berparameter role (<code>auth:admin</code>).</td></tr>
+</tbody></table>
+<p><b>Latihan 2</b> meminta dua aplikasi: <b>SIAKAD</b> (Sistem Informasi Akademik) dan <b>Toko Online</b>, keduanya dengan CodeIgniter.</p>
+
+<!--══════════════════════════════════════════════════-->
+<h2 style="border-left: 5px solid rgb(190, 242, 100); padding-left: 12px;">Pendahuluan</h2>
+<p><b>CodeIgniter 4</b> adalah framework PHP berpola <b>MVC</b> (Model-View-Controller) yang ringan dan cepat. Request masuk lewat <code>public/index.php</code> lalu dicocokkan oleh <b>Router</b>. Sebelum masuk ke Controller, request melewati <b>Filter</b> (misalnya CSRF dan cek login). Controller mengambil data lewat <b>Model</b> dan mengirimkannya ke <b>View</b>. Laporan ini membahas pembuatan dua aplikasi:</p>
+<ul style="text-align: left;">
+<li><b>SIAKAD</b>: tiga role (admin, dosen, mahasiswa). Admin mengelola mahasiswa, dosen, dan matakuliah. Mahasiswa mengisi KRS dan melihat KHS beserta IP/IPK. Dosen menginput nilai.</li>
+<li><b>Toko Online</b>: katalog produk dengan kategori, keranjang belanja, checkout, riwayat pesanan, serta panel admin untuk produk, kategori, dan pesanan.</li>
+</ul>
+<p>Lingkungan pengembangan: Windows 11 + WSL, XAMPP (PHP 8.2 dan MariaDB), Composer, dan browser Microsoft Edge.</p>
+
+<!--══════════════════════════════════════════════════-->
+<h2 style="border-left: 5px solid rgb(190, 242, 100); padding-left: 12px;">Bagian 1: Instalasi dan Konfigurasi CodeIgniter 4</h2>
+
+<h3><span style="background-color: #bef264; border-radius: 50%; color: #1e1f22; display: inline-block; font-family: &quot;JetBrains Mono&quot;, Consolas, monospace; font-size: 11pt; font-weight: 700; height: 30px; line-height: 30px; margin-right: 10px; text-align: center; vertical-align: middle; width: 30px;">1</span><span style="vertical-align: middle;">Instalasi CodeIgniter lewat Composer</span></h3>
+<p>Proyek dibuat dari <i>app starter</i> resmi. Hasilnya adalah folder dengan struktur <code>app/</code> (kode aplikasi), <code>public/</code> (document root), <code>writable/</code> (cache, log, session), dan <code>vendor/</code> (framework).</p>
+<pre style="font-family: &quot;Cascadia Mono&quot;; font-size: 9pt;">composer create-project codeigniter4/appstarter siakad
+composer create-project codeigniter4/appstarter toko-online</pre>
+
+<h3><span style="background-color: #bef264; border-radius: 50%; color: #1e1f22; display: inline-block; font-family: &quot;JetBrains Mono&quot;, Consolas, monospace; font-size: 11pt; font-weight: 700; height: 30px; line-height: 30px; margin-right: 10px; text-align: center; vertical-align: middle; width: 30px;">2</span><span style="vertical-align: middle;">Konfigurasi .env</span></h3>
+<p>File <code>env</code> disalin menjadi <code>.env</code>, lalu baseURL, environment, dan koneksi database diatur. CSRF diaktifkan secara global di <code>app/Config/Filters.php</code> sehingga setiap form wajib membawa <code>csrf_field()</code>.</p>
+<pre style="font-family: &quot;Cascadia Mono&quot;; font-size: 9pt;">CI_ENVIRONMENT = development
+app.baseURL = 'http://localhost:8080/'
+
+database.default.hostname = localhost
+database.default.database = ci_siakad
+database.default.username = root
+database.default.password =
+database.default.DBDriver = MySQLi
+database.default.port = 3306</pre>
+
+<h3><span style="background-color: #bef264; border-radius: 50%; color: #1e1f22; display: inline-block; font-family: &quot;JetBrains Mono&quot;, Consolas, monospace; font-size: 11pt; font-weight: 700; height: 30px; line-height: 30px; margin-right: 10px; text-align: center; vertical-align: middle; width: 30px;">3</span><span style="vertical-align: middle;">Membuat Database dengan Migration dan Seeder</span></h3>
+<p>Skema tabel ditulis sebagai <b>migration</b> agar bisa dibuat ulang di komputer mana pun. Data awal (akun admin, dosen, mahasiswa, dan matakuliah) diisi lewat <b>seeder</b>.</p>
+<pre style="font-family: &quot;Cascadia Mono&quot;; font-size: 9pt;">CREATE DATABASE ci_siakad;
+php spark migrate
+php spark db:seed SiakadSeeder</pre>
+
+<h3><span style="background-color: #bef264; border-radius: 50%; color: #1e1f22; display: inline-block; font-family: &quot;JetBrains Mono&quot;, Consolas, monospace; font-size: 11pt; font-weight: 700; height: 30px; line-height: 30px; margin-right: 10px; text-align: center; vertical-align: middle; width: 30px;">4</span><span style="vertical-align: middle;">Running Aplikasi</span></h3>
+<p>Di XAMPP ekstensi <code>intl</code> (wajib untuk CI4) tidak aktif secara default. Perintah <code>php spark serve</code> menjalankan proses PHP baru tanpa opsi tambahan, jadi server dijalankan dengan <code>serve.bat</code> yang memanggil built-in server PHP secara langsung:</p>
+<pre style="font-family: &quot;Cascadia Mono&quot;; font-size: 9pt;">@echo off
+rem Jalankan dev server dengan ekstensi intl
+cd /d %~dp0
+C:\xampp\php\php.exe -d extension=intl -S localhost:%1 -t public vendor\codeigniter4\framework\system\rewrite.php</pre>
+<pre style="font-family: &quot;Cascadia Mono&quot;; font-size: 9pt;">siakad\serve.bat 8080        -&gt; http://localhost:8080
+toko-online\serve.bat 8081   -&gt; http://localhost:8081</pre>
+<p>Seluruh source code tersimpan di repository GitHub <a href="https://github.com/MathiasAdya/pbkk-codeigniter4" target="_blank">MathiasAdya/pbkk-codeigniter4</a> (publik). Folder <code>vendor/</code> dan file <code>.env</code> tidak ikut di-commit, sehingga setelah clone perlu dijalankan:</p>
+<pre style="font-family: &quot;Cascadia Mono&quot;; font-size: 9pt;">git clone https://github.com/MathiasAdya/pbkk-codeigniter4.git
+cd pbkk-codeigniter4/siakad      # atau toko-online
+composer install
+copy env .env                    # atur baseURL dan database
+php spark migrate
+php spark db:seed SiakadSeeder   # toko-online: TokoSeeder</pre>
+<p>Akun untuk mencoba aplikasi:</p>
+<table style="border-collapse: collapse; margin: 10px 0px; width: 100%;"><tbody>
+<tr style="background-color: #bef264; color: #1e1f22;"><th style="border: 1px solid rgb(226, 232, 240); padding: 8px;">Aplikasi</th><th style="border: 1px solid rgb(226, 232, 240); padding: 8px;">Role</th><th style="border: 1px solid rgb(226, 232, 240); padding: 8px;">Username / Password</th></tr>
+<tr><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;">SIAKAD</td><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;">Admin</td><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;"><code>admin</code> / <code>admin123</code></td></tr>
+<tr><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;">SIAKAD</td><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;">Dosen</td><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;">NIDN / NIDN, contoh <code>0011223301</code></td></tr>
+<tr><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;">SIAKAD</td><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;">Mahasiswa</td><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;">NRP / NRP, contoh <code>5025231015</code></td></tr>
+<tr><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;">Toko Online</td><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;">Admin</td><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;"><code>admin</code> / <code>admin123</code></td></tr>
+<tr><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;">Toko Online</td><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;">Customer</td><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;"><code>budi</code> / <code>budi123</code> (atau daftar akun baru di <code>/register</code>)</td></tr>
+</tbody></table>
+
+<h3><span style="background-color: #bef264; border-radius: 50%; color: #1e1f22; display: inline-block; font-family: &quot;JetBrains Mono&quot;, Consolas, monospace; font-size: 11pt; font-weight: 700; height: 30px; line-height: 30px; margin-right: 10px; text-align: center; vertical-align: middle; width: 30px;">5</span><span style="vertical-align: middle;">Kendala dan Solusi</span></h3>
+<table style="border-collapse: collapse; margin: 10px 0px; width: 100%;"><tbody>
+<tr style="background-color: #bef264; color: #1e1f22;"><th style="border: 1px solid rgb(226, 232, 240); padding: 8px;">Kendala</th><th style="border: 1px solid rgb(226, 232, 240); padding: 8px;">Penyebab</th><th style="border: 1px solid rgb(226, 232, 240); padding: 8px;">Solusi</th></tr>
+<tr><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;">Error <i>"The framework needs the following extension(s) installed and loaded: intl"</i></td><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;">Ekstensi intl tidak aktif di php.ini bawaan XAMPP.</td><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;">Menjalankan PHP dengan <code>-d extension=intl</code>.</td></tr>
+<tr><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;"><code>php spark serve</code> tetap gagal</td><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;">spark menjalankan proses PHP baru tanpa opsi <code>-d</code>.</td><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;">Membuat <code>serve.bat</code> yang menjalankan <code>php -S</code> langsung dengan <code>rewrite.php</code>.</td></tr>
+<tr><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;">Semua relasi ikut terhapus (CASCADE), padahal seharusnya RESTRICT atau SET NULL</td><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;">Urutan argumen <code>addForeignKey()</code> tertukar.</td><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;">Urutan yang benar adalah <code>addForeignKey($field, $table, $col, $onUpdate, $onDelete)</code>. onUpdate ditulis lebih dulu.</td></tr>
+<tr><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;">Error 500 <i>"Call to undefined function user()"</i> di halaman KRS/Nilai</td><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;">Helper dimuat di <code>initController()</code>, yang dipanggil setelah <code>__construct()</code>.</td><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;">Helper <code>siakad</code> di-autoload lewat <code>Config/Autoload::$helpers</code>.</td></tr>
+<tr><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;">Validasi gambar gagal di server tanpa GD</td><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;">Ekstensi GD tidak tersedia.</td><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;">Validasi cukup memakai <code>is_image</code>, <code>mime_in</code>, dan <code>max_size</code>, tanpa resize gambar.</td></tr>
+<tr><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;">Error 500 saat menghapus kategori yang masih memiliki produk</td><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;">FK <code>RESTRICT</code> membuat MariaDB menolak DELETE dan CI4 melempar <code>DatabaseException</code>.</td><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;">Exception ditangkap di controller dan diganti pesan <i>"Kategori tidak dapat dihapus karena masih memiliki produk."</i></td></tr>
+<tr><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;">Total pendapatan di dashboard selalu kosong</td><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;"><code>selectSum()</code> pada Model bercampur dengan select bawaan model.</td><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;">Query dijalankan lewat <code>$model-&gt;builder()-&gt;selectSum('total')-&gt;get()-&gt;getRowArray()</code>.</td></tr>
+<tr><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;">Stok bisa minus jika dua pelanggan checkout bersamaan</td><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;">Stok dicek lalu dikurangi di dua query terpisah tanpa penguncian.</td><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;">Checkout dijalankan dalam transaksi dengan <code>SELECT ... FOR UPDATE</code>; jumlah di keranjang juga dibatasi stok.</td></tr>
+</tbody></table>
+
+<!--══════════════════════════════════════════════════-->
+<h2 style="border-left: 5px solid rgb(190, 242, 100); padding-left: 12px;">Bagian 2: Aplikasi SIAKAD</h2>
+
+<h3><span style="background-color: #bef264; border-radius: 50%; color: #1e1f22; display: inline-block; font-family: &quot;JetBrains Mono&quot;, Consolas, monospace; font-size: 11pt; font-weight: 700; height: 30px; line-height: 30px; margin-right: 10px; text-align: center; vertical-align: middle; width: 30px;">1</span><span style="vertical-align: middle;">Merancang Database</span></h3>
+<p>Akun login semua role disimpan di tabel <code>users</code>, sedangkan data profil disimpan di tabel <code>dosen</code> dan <code>mahasiswa</code> yang terhubung lewat <code>user_id</code>. Tabel <code>krs</code> menyimpan matakuliah yang diambil mahasiswa per tahun ajaran beserta nilainya.</p>
+<pre style="font-family: &quot;Cascadia Mono&quot;; font-size: 9pt;">users 1 ── 1 dosen        (user_id, ON DELETE CASCADE)
+users 1 ── 1 mahasiswa    (user_id, ON DELETE CASCADE)
+dosen 1 ── N mahasiswa    (dosen_wali_id, ON DELETE SET NULL)
+dosen 1 ── N matakuliah   (dosen_id, ON DELETE SET NULL)
+mahasiswa 1 ── N krs N ── 1 matakuliah
+              (CASCADE)        (RESTRICT: matakuliah yang sudah diambil tidak bisa dihapus)</pre>
+<pre style="font-family: &quot;Cascadia Mono&quot;; font-size: 9pt;">// app/Database/Migrations/2026-11-04-000001_CreateSiakadTables.php
+$this-&gt;forge-&gt;addForeignKey('mahasiswa_id', 'mahasiswa', 'id', 'CASCADE', 'CASCADE');
+$this-&gt;forge-&gt;addForeignKey('matakuliah_id', 'matakuliah', 'id', 'CASCADE', 'RESTRICT');
+$this-&gt;forge-&gt;addUniqueKey(['mahasiswa_id', 'matakuliah_id', 'tahun_ajaran']);
+$this-&gt;forge-&gt;createTable('krs');</pre>
+
+<h3><span style="background-color: #bef264; border-radius: 50%; color: #1e1f22; display: inline-block; font-family: &quot;JetBrains Mono&quot;, Consolas, monospace; font-size: 11pt; font-weight: 700; height: 30px; line-height: 30px; margin-right: 10px; text-align: center; vertical-align: middle; width: 30px;">2</span><span style="vertical-align: middle;">Router dan Controller</span></h3>
+<p>Route dikelompokkan per role. Setiap group diberi filter, sehingga controller tidak perlu memeriksa hak akses sendiri. Route CRUD admin dibuat dengan perulangan agar tiga master data memakai pola URL yang sama.</p>
+<pre style="font-family: &quot;Cascadia Mono&quot;; font-size: 9pt;">$routes-&gt;get('/', 'Home::index');
+$routes-&gt;get('login', 'Auth::login');
+$routes-&gt;post('login', 'Auth::attempt');
+$routes-&gt;get('logout', 'Auth::logout');
+$routes-&gt;get('dashboard', 'Dashboard::index', ['filter' =&gt; 'auth']);
+
+// Admin: CRUD master data
+$routes-&gt;group('admin', ['namespace' =&gt; 'App\Controllers\Admin', 'filter' =&gt; 'auth:admin'], static function ($routes) {
+    foreach (['mahasiswa' =&gt; 'Mahasiswa', 'dosen' =&gt; 'Dosen', 'matakuliah' =&gt; 'Matakuliah'] as $uri =&gt; $controller) {
+        $routes-&gt;get($uri, "{$controller}::index");
+        $routes-&gt;get("{$uri}/new", "{$controller}::new");
+        $routes-&gt;post($uri, "{$controller}::create");
+        $routes-&gt;get("{$uri}/(:num)/edit", "{$controller}::edit/$1");
+        $routes-&gt;post("{$uri}/(:num)", "{$controller}::update/$1");
+        $routes-&gt;post("{$uri}/(:num)/delete", "{$controller}::delete/$1");
+    }
+});
+
+// Mahasiswa: KRS &amp; KHS
+$routes-&gt;group('', ['filter' =&gt; 'auth:mahasiswa'], static function ($routes) {
+    $routes-&gt;get('krs', 'Krs::index');
+    $routes-&gt;post('krs', 'Krs::ambil');
+    $routes-&gt;post('krs/(:num)/delete', 'Krs::drop/$1');
+    $routes-&gt;get('khs', 'Krs::khs');
+});
+
+// Dosen: input nilai
+$routes-&gt;group('nilai', ['filter' =&gt; 'auth:dosen'], static function ($routes) {
+    $routes-&gt;get('/', 'Nilai::index');
+    $routes-&gt;get('(:num)', 'Nilai::show/$1');
+    $routes-&gt;post('(:num)', 'Nilai::save/$1');
+});</pre>
+<p>Aksi hapus dan ubah memakai POST, bukan GET, sehingga selalu dilindungi token CSRF.</p>
+
+<h3><span style="background-color: #bef264; border-radius: 50%; color: #1e1f22; display: inline-block; font-family: &quot;JetBrains Mono&quot;, Consolas, monospace; font-size: 11pt; font-weight: 700; height: 30px; line-height: 30px; margin-right: 10px; text-align: center; vertical-align: middle; width: 30px;">3</span><span style="vertical-align: middle;">View Bootstrap dan Template SB Admin 2</span></h3>
+<p>Halaman beranda dan login memakai Bootstrap. Halaman setelah login memakai layout <code>layouts/admin.php</code> berbasis <b>SB Admin 2</b> (CSS/JS dari CDN jsDelivr). View lain cukup meng-<i>extend</i> layout tersebut dan mengisi section <code>content</code>. Menu sidebar (<code>layouts/_sidebar.php</code>) ditampilkan sesuai role yang login, dan pesan flashdata ditampilkan oleh <code>layouts/_alerts.php</code>.</p>
+<pre style="font-family: &quot;Cascadia Mono&quot;; font-size: 9pt;">&amp;lt;!-- app/Views/admin/mahasiswa/index.php --&amp;gt;
+&amp;lt;?= $this-&amp;gt;extend('layouts/admin') ?&amp;gt;
+&amp;lt;?= $this-&amp;gt;section('content') ?&amp;gt;
+  ... tabel data, form pencarian, $pager-&amp;gt;links() ...
+&amp;lt;?= $this-&amp;gt;endSection() ?&amp;gt;</pre>
+
+<h3><span style="background-color: #bef264; border-radius: 50%; color: #1e1f22; display: inline-block; font-family: &quot;JetBrains Mono&quot;, Consolas, monospace; font-size: 11pt; font-weight: 700; height: 30px; line-height: 30px; margin-right: 10px; text-align: center; vertical-align: middle; width: 30px;">4</span><span style="vertical-align: middle;">Model dan CRUD</span></h3>
+<p>Setiap tabel punya Model dengan <code>$allowedFields</code> (melindungi dari mass assignment), <code>$validationRules</code>, dan timestamp otomatis. Password di-hash otomatis lewat callback <code>beforeInsert</code> dan <code>beforeUpdate</code>:</p>
+<pre style="font-family: &quot;Cascadia Mono&quot;; font-size: 9pt;">class UserModel extends Model
+{
+    protected $table         = 'users';
+    protected $allowedFields = ['username', 'password', 'nama', 'role'];
+    protected $beforeInsert  = ['hashPassword'];
+    protected $beforeUpdate  = ['hashPassword'];
+
+    protected function hashPassword(array $data): array
+    {
+        if (! empty($data['data']['password'])) {
+            $data['data']['password'] = password_hash($data['data']['password'], PASSWORD_DEFAULT);
+        } else {
+            unset($data['data']['password']);
+        }
+        return $data;
+    }
+
+    public function attempt(string $username, string $password): ?array
+    {
+        $user = $this-&gt;where('username', $username)-&gt;first();
+        return ($user &amp;&amp; password_verify($password, $user['password'])) ? $user : null;
+    }
+}</pre>
+<p>Saat admin menambah dosen atau mahasiswa, akun login di <code>users</code> dan profilnya dibuat dalam satu transaksi database (trait <code>HasUserAccount</code>). Username dan password awal sama dengan NIDN/NRP. Halaman daftar dilengkapi pencarian dan paginasi (<code>paginate(10)</code>). Matakuliah yang sudah ada di KRS tidak bisa dihapus karena FK RESTRICT, dan admin mendapat pesan error yang jelas.</p>
+
+<h3><span style="background-color: #bef264; border-radius: 50%; color: #1e1f22; display: inline-block; font-family: &quot;JetBrains Mono&quot;, Consolas, monospace; font-size: 11pt; font-weight: 700; height: 30px; line-height: 30px; margin-right: 10px; text-align: center; vertical-align: middle; width: 30px;">5</span><span style="vertical-align: middle;">Upload Foto Mahasiswa</span></h3>
+<p>Form mahasiswa memakai <code>form_open_multipart()</code>. File divalidasi (gambar, maks 1 MB, JPEG/PNG/WEBP), lalu disimpan dengan nama acak ke <code>public/uploads/foto/</code>. Foto lama dihapus saat diganti atau saat data dihapus.</p>
+<pre style="font-family: &quot;Cascadia Mono&quot;; font-size: 9pt;">private const FOTO_RULE = 'is_image[foto]|max_size[foto,1024]|mime_in[foto,image/jpeg,image/png,image/webp]';
+
+public function create()
+{
+    $data = $this-&gt;input();
+    if (! $this-&gt;model-&gt;validate($data) || ! $this-&gt;validate(['foto' =&gt; 'uploaded[foto]|' . self::FOTO_RULE])) {
+        return $this-&gt;back();
+    }
+    $data['foto'] = $this-&gt;storeFoto($this-&gt;request-&gt;getFile('foto'));
+    ...
+}
+
+private function storeFoto(UploadedFile $file): string
+{
+    $name = $file-&gt;getRandomName();
+    $file-&gt;move(self::FOTO_DIR, $name);
+    return $name;
+}</pre>
+
+<h3><span style="background-color: #bef264; border-radius: 50%; color: #1e1f22; display: inline-block; font-family: &quot;JetBrains Mono&quot;, Consolas, monospace; font-size: 11pt; font-weight: 700; height: 30px; line-height: 30px; margin-right: 10px; text-align: center; vertical-align: middle; width: 30px;">6</span><span style="vertical-align: middle;">Hak Akses User dengan Filter</span></h3>
+<p>Login menyimpan <code>logged_in</code>, <code>role</code>, dan data user ke session, setelah ID session diganti (<code>session()-&gt;regenerate()</code>) untuk mencegah session fixation. <code>AuthFilter</code> menerima argumen role dari route, misalnya <code>auth:admin</code>:</p>
+<pre style="font-family: &quot;Cascadia Mono&quot;; font-size: 9pt;">class AuthFilter implements FilterInterface
+{
+    public function before(RequestInterface $request, $arguments = null)
+    {
+        $session = session();
+
+        if (! $session-&gt;get('logged_in')) {
+            return redirect()-&gt;to('/login')-&gt;with('error', 'Silakan login terlebih dahulu.');
+        }
+
+        if (! empty($arguments) &amp;&amp; ! in_array($session-&gt;get('role'), $arguments, true)) {
+            return redirect()-&gt;to('/dashboard')-&gt;with('error', 'Anda tidak memiliki akses ke halaman tersebut.');
+        }
+    }
+}</pre>
+<pre style="font-family: &quot;Cascadia Mono&quot;; font-size: 9pt;">// app/Config/Filters.php
+public array $aliases = [
+    ...
+    'auth' =&gt; \App\Filters\AuthFilter::class,
+];</pre>
+
+<h3><span style="background-color: #bef264; border-radius: 50%; color: #1e1f22; display: inline-block; font-family: &quot;JetBrains Mono&quot;, Consolas, monospace; font-size: 11pt; font-weight: 700; height: 30px; line-height: 30px; margin-right: 10px; text-align: center; vertical-align: middle; width: 30px;">7</span><span style="vertical-align: middle;">KRS dan KHS Mahasiswa</span></h3>
+<p>Mahasiswa memilih matakuliah untuk semester berjalan (<code>2026/2027 Ganjil</code>). Model menolak matakuliah yang sudah diambil dan total SKS yang melebihi 24. Pembatalan hanya berlaku untuk KRS milik sendiri, pada semester berjalan, yang belum dinilai. Syarat ini ditulis langsung di query DELETE, sehingga mahasiswa lain tidak bisa membatalkan KRS orang lain dengan mengganti ID.</p>
+<pre style="font-family: &quot;Cascadia Mono&quot;; font-size: 9pt;">public function ambil(int $mahasiswaId, array $matakuliah): ?string
+{
+    $krs = $this-&gt;forMahasiswa($mahasiswaId);
+
+    if (in_array($matakuliah['id'], array_column($krs, 'matakuliah_id'))) {
+        return 'Matakuliah sudah ada di KRS.';
+    }
+    if (array_sum(array_column($krs, 'sks')) + $matakuliah['sks'] &gt; self::MAX_SKS) {
+        return 'Total SKS melebihi batas ' . self::MAX_SKS . ' SKS.';
+    }
+    $this-&gt;insert([...]);
+    return null;
+}
+
+// Controller Krs::drop
+$this-&gt;krs-&gt;where([
+    'id'           =&gt; $id,
+    'mahasiswa_id' =&gt; $this-&gt;mahasiswa['id'],
+    'tahun_ajaran' =&gt; KrsModel::TAHUN_AJARAN,
+])-&gt;where('nilai', null)-&gt;delete();</pre>
+<p>KHS mengelompokkan nilai per tahun ajaran. IP dan IPK dihitung oleh helper <code>hitung_ip()</code> dengan bobot A=4, AB=3,5, B=3, BC=2,5, C=2, D=1, E=0. Matakuliah yang belum dinilai tidak ikut dihitung.</p>
+
+<h3><span style="background-color: #bef264; border-radius: 50%; color: #1e1f22; display: inline-block; font-family: &quot;JetBrains Mono&quot;, Consolas, monospace; font-size: 11pt; font-weight: 700; height: 30px; line-height: 30px; margin-right: 10px; text-align: center; vertical-align: middle; width: 30px;">8</span><span style="vertical-align: middle;">Input Nilai oleh Dosen</span></h3>
+<p>Dosen hanya melihat matakuliah yang diampunya. Membuka matakuliah dosen lain (misalnya <code>/nilai/2</code>) menghasilkan 404. Nilai seluruh peserta disimpan sekaligus dari satu form, dan setiap nilai divalidasi terhadap daftar huruf yang sah.</p>
+
+<!--══════════════════════════════════════════════════-->
+<h2 style="border-left: 5px solid rgb(190, 242, 100); padding-left: 12px;">Bagian 3: Aplikasi Toko Online</h2>
+<h3><span style="background-color: #bef264; border-radius: 50%; color: #1e1f22; display: inline-block; font-family: &quot;JetBrains Mono&quot;, Consolas, monospace; font-size: 11pt; font-weight: 700; height: 30px; line-height: 30px; margin-right: 10px; text-align: center; vertical-align: middle; width: 30px;">1</span><span style="vertical-align: middle;">Merancang Database</span></h3>
+<p>Akun admin dan pelanggan disimpan di tabel <code>users</code> dengan kolom <code>role</code>. Setiap pesanan (<code>orders</code>) memiliki banyak <code>order_items</code>, dan setiap item menyimpan <b>harga saat dibeli</b> (snapshot) sehingga perubahan harga produk tidak mengubah pesanan lama.</p>
+<pre style="font-family: &quot;Cascadia Mono&quot;; font-size: 9pt;">kategori 1 ── N produk        (kategori_id, RESTRICT: kategori berisi produk tidak bisa dihapus)
+users    1 ── N orders        (user_id, CASCADE)
+orders   1 ── N order_items   (order_id, CASCADE)
+produk   1 ── N order_items   (produk_id, RESTRICT: produk yang pernah dipesan tidak bisa dihapus)</pre>
+<pre style="font-family: &quot;Cascadia Mono&quot;; font-size: 9pt;">// app/Database/Migrations/2026-11-04-000001_CreateTokoTables.php
+// addForeignKey(field, table, column, onUpdate, onDelete)
+$this-&gt;forge-&gt;addForeignKey('kategori_id', 'kategori', 'id', 'CASCADE', 'RESTRICT');
+$this-&gt;forge-&gt;createTable('produk');
+...
+$this-&gt;forge-&gt;addForeignKey('order_id', 'orders', 'id', 'CASCADE', 'CASCADE');
+$this-&gt;forge-&gt;addForeignKey('produk_id', 'produk', 'id', 'CASCADE', 'RESTRICT');
+$this-&gt;forge-&gt;createTable('order_items');</pre>
+
+<h3><span style="background-color: #bef264; border-radius: 50%; color: #1e1f22; display: inline-block; font-family: &quot;JetBrains Mono&quot;, Consolas, monospace; font-size: 11pt; font-weight: 700; height: 30px; line-height: 30px; margin-right: 10px; text-align: center; vertical-align: middle; width: 30px;">2</span><span style="vertical-align: middle;">Router dan Filter Hak Akses</span></h3>
+<p>Etalase dan keranjang bersifat publik. Checkout dan riwayat pesanan hanya untuk role <code>customer</code>, sedangkan panel admin memakai filter <code>auth:admin</code>. Filter yang sama (<code>AuthFilter</code>) dipakai seperti di SIAKAD: belum login diarahkan ke <code>/login</code>, role yang salah diarahkan ke beranda dengan pesan <i>"Anda tidak memiliki akses ke halaman tersebut."</i></p>
+<pre style="font-family: &quot;Cascadia Mono&quot;; font-size: 9pt;">$routes-&gt;get('/', 'Toko::index');
+$routes-&gt;get('produk/(:num)', 'Toko::detail/$1');
+
+// Keranjang (session, boleh tanpa login)
+$routes-&gt;get('keranjang', 'Keranjang::index');
+$routes-&gt;post('keranjang/tambah', 'Keranjang::tambah');
+$routes-&gt;post('keranjang/update', 'Keranjang::update');
+$routes-&gt;post('keranjang/hapus/(:num)', 'Keranjang::hapus/$1');
+
+// Customer: checkout &amp; pesanan
+$routes-&gt;group('', ['filter' =&gt; 'auth:customer'], static function ($routes) {
+    $routes-&gt;get('checkout', 'Checkout::index');
+    $routes-&gt;post('checkout', 'Checkout::proses');
+    $routes-&gt;get('pesanan', 'Pesanan::index');
+    $routes-&gt;get('pesanan/(:num)', 'Pesanan::show/$1');
+    $routes-&gt;post('pesanan/(:num)/batal', 'Pesanan::batal/$1');
+});
+
+// Admin: dashboard, CRUD kategori &amp; produk, kelola pesanan
+$routes-&gt;group('admin', ['namespace' =&gt; 'App\Controllers\Admin', 'filter' =&gt; 'auth:admin'], static function ($routes) {
+    $routes-&gt;get('/', 'Dashboard::index');
+    foreach (['kategori' =&gt; 'Kategori', 'produk' =&gt; 'Produk'] as $uri =&gt; $controller) {
+        // index, new, create, edit, update, delete (pola sama dengan SIAKAD)
+    }
+    $routes-&gt;get('pesanan', 'Pesanan::index');
+    $routes-&gt;get('pesanan/(:num)', 'Pesanan::show/$1');
+    $routes-&gt;post('pesanan/(:num)/status', 'Pesanan::status/$1');
+});</pre>
+
+<h3><span style="background-color: #bef264; border-radius: 50%; color: #1e1f22; display: inline-block; font-family: &quot;JetBrains Mono&quot;, Consolas, monospace; font-size: 11pt; font-weight: 700; height: 30px; line-height: 30px; margin-right: 10px; text-align: center; vertical-align: middle; width: 30px;">3</span><span style="vertical-align: middle;">Katalog Produk</span></h3>
+<p>Beranda menampilkan produk dalam kartu Bootstrap dengan filter kategori, pencarian nama, dan paginasi 9 produk per halaman. Query dibangun di <code>ProdukModel::daftar()</code> sehingga dipakai juga oleh halaman produk admin.</p>
+<pre style="font-family: &quot;Cascadia Mono&quot;; font-size: 9pt;">public function index(): string
+{
+    $q        = trim((string) $this-&gt;request-&gt;getGet('q'));
+    $kategori = (int) $this-&gt;request-&gt;getGet('kategori');
+    $model    = model(ProdukModel::class);
+
+    return view('toko/index', [
+        'produk'   =&gt; $model-&gt;daftar($q, $kategori)-&gt;paginate(9),
+        'pager'    =&gt; $model-&gt;pager,
+        'kategori' =&gt; model(KategoriModel::class)-&gt;orderBy('nama')-&gt;findAll(),
+        ...
+    ]);
+}</pre>
+
+<h3><span style="background-color: #bef264; border-radius: 50%; color: #1e1f22; display: inline-block; font-family: &quot;JetBrains Mono&quot;, Consolas, monospace; font-size: 11pt; font-weight: 700; height: 30px; line-height: 30px; margin-right: 10px; text-align: center; vertical-align: middle; width: 30px;">4</span><span style="vertical-align: middle;">Keranjang Belanja (Session)</span></h3>
+<p>Keranjang disimpan di session dalam bentuk <code>[produk_id =&gt; qty]</code> melalui library <code>App\Libraries\Cart</code>, sehingga pengunjung bisa berbelanja sebelum login. Jumlah selalu dibatasi stok yang tersedia.</p>
+<pre style="font-family: &quot;Cascadia Mono&quot;; font-size: 9pt;">public function add(int $id, int $qty): ?string
+{
+    $produk = model(ProdukModel::class)-&gt;find($id);
+    if (! $produk) {
+        return 'Produk tidak ditemukan.';
+    }
+    if ($produk['stok'] &lt; 1) {
+        return 'Stok produk habis.';
+    }
+
+    $cart      = $this-&gt;raw();
+    $baru      = ($cart[$id] ?? 0) + max(1, $qty);
+    $cart[$id] = min($baru, (int) $produk['stok']);
+    session()-&gt;set(self::KEY, $cart);
+
+    return $baru &gt; $produk['stok'] ? 'Jumlah dibatasi sesuai stok tersedia (' . $produk['stok'] . ').' : null;
+}</pre>
+
+<h3><span style="background-color: #bef264; border-radius: 50%; color: #1e1f22; display: inline-block; font-family: &quot;JetBrains Mono&quot;, Consolas, monospace; font-size: 11pt; font-weight: 700; height: 30px; line-height: 30px; margin-right: 10px; text-align: center; vertical-align: middle; width: 30px;">5</span><span style="vertical-align: middle;">Checkout dalam Satu Transaksi</span></h3>
+<p>Stok bisa berubah antara saat produk dimasukkan ke keranjang dan saat checkout, misalnya karena pelanggan lain membeli produk yang sama. Karena itu <code>OrderModel::buat()</code> mengunci baris produk dengan <code>SELECT ... FOR UPDATE</code>, memeriksa stok, menguranginya, lalu menyimpan order dan item dalam satu transaksi. Bila satu item gagal, semua perubahan di-rollback.</p>
+<pre style="font-family: &quot;Cascadia Mono&quot;; font-size: 9pt;">$db-&gt;transBegin();
+try {
+    foreach ($items as $item) {
+        $p = $db-&gt;query('SELECT id, nama, harga, stok FROM produk WHERE id = ? FOR UPDATE', [$item['id']])-&gt;getRowArray();
+        if ($p['stok'] &lt; $item['qty']) {
+            throw new RuntimeException("Stok \"{$p['nama']}\" tidak mencukupi (tersisa {$p['stok']}).");
+        }
+        $total  += $p['harga'] * $item['qty'];
+        $baris[] = ['produk_id' =&gt; $p['id'], 'qty' =&gt; $item['qty'], 'harga' =&gt; $p['harga']];
+        $db-&gt;query('UPDATE produk SET stok = stok - ? WHERE id = ?', [$item['qty'], $p['id']]);
+    }
+    $orderId = $this-&gt;insert(['user_id' =&gt; $userId, 'total' =&gt; $total, 'alamat' =&gt; $alamat, 'status' =&gt; 'pending'], true);
+    foreach ($baris as $b) {
+        model(OrderItemModel::class)-&gt;insert($b + ['order_id' =&gt; $orderId]);
+    }
+    $db-&gt;transCommit();
+} catch (\Throwable $e) {
+    $db-&gt;transRollback();
+    throw $e;
+}</pre>
+<p>Controller <code>Checkout::proses()</code> memvalidasi alamat, memanggil <code>buat()</code>, mengosongkan keranjang, lalu mengarahkan ke detail pesanan dengan pesan <i>"Pesanan berhasil dibuat."</i></p>
+
+<h3><span style="background-color: #bef264; border-radius: 50%; color: #1e1f22; display: inline-block; font-family: &quot;JetBrains Mono&quot;, Consolas, monospace; font-size: 11pt; font-weight: 700; height: 30px; line-height: 30px; margin-right: 10px; text-align: center; vertical-align: middle; width: 30px;">6</span><span style="vertical-align: middle;">Riwayat dan Pembatalan Pesanan</span></h3>
+<p>Pelanggan hanya melihat pesanan miliknya (<code>withPelanggan($userId)</code>). Pesanan berstatus <code>pending</code> dapat dibatalkan, dan pembatalan mengembalikan stok produk di dalam transaksi yang sama.</p>
+<pre style="font-family: &quot;Cascadia Mono&quot;; font-size: 9pt;">if ($status === 'batal') {
+    foreach (model(OrderItemModel::class)-&gt;where('order_id', $id)-&gt;findAll() as $it) {
+        $db-&gt;query('UPDATE produk SET stok = stok + ? WHERE id = ?', [$it['qty'], $it['produk_id']]);
+    }
+}
+$this-&gt;update($id, ['status' =&gt; $status]);</pre>
+
+<h3><span style="background-color: #bef264; border-radius: 50%; color: #1e1f22; display: inline-block; font-family: &quot;JetBrains Mono&quot;, Consolas, monospace; font-size: 11pt; font-weight: 700; height: 30px; line-height: 30px; margin-right: 10px; text-align: center; vertical-align: middle; width: 30px;">7</span><span style="vertical-align: middle;">Panel Admin: CRUD Kategori dan Produk dengan Upload Gambar</span></h3>
+<p>Dashboard admin menampilkan jumlah produk, pesanan, pelanggan, dan total pendapatan (pesanan berstatus dibayar, dikirim, atau selesai). CRUD produk menerima gambar JPG/PNG/WEBP maksimal 2 MB yang disimpan ke <code>public/uploads/produk</code> dengan nama acak. Gambar lama dihapus saat diganti. Penghapusan yang melanggar FK RESTRICT ditangkap dan ditampilkan sebagai pesan.</p>
+<pre style="font-family: &quot;Cascadia Mono&quot;; font-size: 9pt;">private const GAMBAR_RULE = 'is_image[gambar]|mime_in[gambar,image/jpeg,image/png,image/webp]|max_size[gambar,2048]';
+
+public function delete(int $id)
+{
+    $row = $this-&gt;findOr404($id);
+    try {
+        $this-&gt;model-&gt;delete($id);
+    } catch (DatabaseException) {
+        // FK order_items -&gt; produk bersifat RESTRICT
+        return redirect()-&gt;to('/admin/produk')-&gt;with('error', 'Produk tidak dapat dihapus karena sudah pernah dipesan.');
+    }
+    $this-&gt;hapusFile($row['gambar']);
+    return redirect()-&gt;to('/admin/produk')-&gt;with('success', 'Produk dihapus.');
+}</pre>
+
+<h3><span style="background-color: #bef264; border-radius: 50%; color: #1e1f22; display: inline-block; font-family: &quot;JetBrains Mono&quot;, Consolas, monospace; font-size: 11pt; font-weight: 700; height: 30px; line-height: 30px; margin-right: 10px; text-align: center; vertical-align: middle; width: 30px;">8</span><span style="vertical-align: middle;">Pengelolaan Status Pesanan</span></h3>
+<p>Admin mengubah status pesanan melalui alur <code>pending → dibayar → dikirim → selesai</code>, atau <code>batal</code>. Status <code>batal</code> bersifat final: pesanan yang sudah dibatalkan tidak bisa diubah lagi, sehingga stok tidak dikembalikan dua kali.</p>
+
+<!--══════════════════════════════════════════════════-->
+<h2 style="border-left: 5px solid rgb(190, 242, 100); padding-left: 12px;">Pembagian Tugas Kelompok</h2>
+<p>Tugas ini dikerjakan secara individu, dengan pembagian pekerjaan sebagai berikut:</p>
+<table style="border-collapse: collapse; margin: 10px 0px; width: 100%;"><tbody>
+<tr style="background-color: #bef264; color: #1e1f22;"><th style="border: 1px solid rgb(226, 232, 240); padding: 8px;">Anggota</th><th style="border: 1px solid rgb(226, 232, 240); padding: 8px;">Area</th><th style="border: 1px solid rgb(226, 232, 240); padding: 8px;">Pekerjaan</th></tr>
+<tr><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;"><b>Mathias</b> (5025231015)</td><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;">SIAKAD</td><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;">Instalasi CI4, desain database dan migration, autentikasi dan filter role, CRUD master data, upload foto, KRS/KHS, input nilai, pengujian.</td></tr>
+<tr><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;"><b>Mathias</b> (5025231015)</td><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;">Toko Online</td><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;">Desain database, katalog dan kategori, keranjang, checkout, riwayat pesanan, panel admin, upload gambar produk, pengujian.</td></tr>
+<tr><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;"><b>Mathias</b> (5025231015)</td><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;">Dokumentasi</td><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;">Screenshot hasil dan penulisan laporan.</td></tr>
+</tbody></table>
+
+<!--══════════════════════════════════════════════════-->
+<h2 style="border-left: 5px solid rgb(190, 242, 100); padding-left: 12px;">Alur Data</h2>
+<p>Sebagai contoh, berikut alur data saat mahasiswa mengambil matakuliah di halaman KRS:</p>
+<pre style="font-family: &quot;Cascadia Mono&quot;; font-size: 9pt;">Mahasiswa klik "Ambil" di krs/index.php (form POST + csrf_field)
+      │  POST /krs  matakuliah_id=4
+      ▼
+Filter global CSRF  ──(token salah)──► error 403
+      │
+Filter auth:mahasiswa (AuthFilter)
+      │  belum login ─► /login      role lain ─► /dashboard + pesan "tidak memiliki akses"
+      ▼
+Router: Krs::ambil   (konstruktor: user('id') ─► MahasiswaModel::findByUser)
+      │  MatakuliahModel::find(4)
+      ▼
+KrsModel::ambil(mahasiswaId, matakuliah)
+      │  cek duplikat ─► "Matakuliah sudah ada di KRS."
+      │  cek total SKS &gt; 24 ─► "Total SKS melebihi batas"
+      │  INSERT krs (tahun_ajaran = 2026/2027 Ganjil)
+      ▼
+redirect('/krs')-&gt;with('success', ...)  ─► flashdata ditampilkan layouts/_alerts.php</pre>
+
+<h3>Tanggung jawab tiap file</h3>
+<table style="border-collapse: collapse; margin: 10px 0px; width: 100%;"><tbody>
+<tr style="background-color: #bef264; color: #1e1f22;"><th style="border: 1px solid rgb(226, 232, 240); padding: 8px;">File</th><th style="border: 1px solid rgb(226, 232, 240); padding: 8px;">Tanggung jawab</th></tr>
+<tr><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;"><code>app/Config/Routes.php</code></td><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;">Memetakan URL ke controller dan memasang filter per group role.</td></tr>
+<tr><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;"><code>app/Config/Filters.php</code></td><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;">Mendaftarkan alias <code>auth</code> dan mengaktifkan CSRF global.</td></tr>
+<tr><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;"><code>app/Config/Autoload.php</code></td><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;">Autoload helper <code>siakad</code> (<code>user()</code>, <code>hitung_ip()</code>).</td></tr>
+<tr><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;"><code>app/Filters/AuthFilter.php</code></td><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;">Cek login dan role sebelum controller dijalankan.</td></tr>
+<tr><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;"><code>app/Controllers/Auth.php</code></td><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;">Login, logout, dan pengisian session.</td></tr>
+<tr><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;"><code>app/Controllers/Admin/*.php</code></td><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;">CRUD mahasiswa (dengan upload foto), dosen, dan matakuliah.</td></tr>
+<tr><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;"><code>app/Controllers/Krs.php</code></td><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;">KRS (ambil/batal) dan KHS mahasiswa.</td></tr>
+<tr><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;"><code>app/Controllers/Nilai.php</code></td><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;">Daftar matakuliah dosen dan input nilai peserta.</td></tr>
+<tr><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;"><code>app/Models/*.php</code></td><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;">Akses tabel, validasi, join, dan aturan bisnis (KRS, hash password, akun + profil dalam satu transaksi).</td></tr>
+<tr><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;"><code>app/Database/Migrations, Seeds</code></td><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;">Skema tabel dengan FK, serta data awal.</td></tr>
+<tr><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;"><code>app/Views/layouts/*.php</code></td><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;">Layout SB Admin 2, sidebar per role, dan alert flashdata.</td></tr>
+<tr><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;"><code>toko-online/app/Libraries/Cart.php</code></td><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;">Keranjang berbasis session, jumlah dibatasi stok.</td></tr>
+<tr><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;"><code>toko-online/app/Models/OrderModel.php</code></td><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;">Checkout dalam transaksi (FOR UPDATE), perubahan status, dan pengembalian stok saat batal.</td></tr>
+<tr><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;"><code>toko-online/app/Controllers/Keranjang.php, Checkout.php, Pesanan.php</code></td><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;">Alur belanja pelanggan: keranjang, checkout, riwayat dan pembatalan pesanan.</td></tr>
+<tr><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;"><code>toko-online/app/Controllers/Admin/*.php</code></td><td style="border: 1px solid rgb(226, 232, 240); padding: 8px;">Dashboard, CRUD kategori dan produk (upload gambar), serta pengelolaan status pesanan.</td></tr>
+</tbody></table>
+
+<!--══════════════════════════════════════════════════-->
+<h2 style="border-left: 5px solid rgb(190, 242, 100); padding-left: 12px;">Kesimpulan</h2>
+<ul style="text-align: left;">
+<li>CodeIgniter 4 memisahkan tanggung jawab dengan jelas: <b>Router</b> memetakan URL, <b>Filter</b> menangani login, role, dan CSRF, <b>Controller</b> mengatur alur, <b>Model</b> menyimpan aturan data, dan <b>View</b> hanya menampilkan.</li>
+<li>Hak akses cukup ditulis sekali di <code>AuthFilter</code> dan dipasang per route group, sehingga tidak ada pengecekan role yang tersebar di controller.</li>
+<li>Migration, seeder, dan foreign key (CASCADE, SET NULL, RESTRICT) membuat database mudah dibuat ulang sekaligus menjaga integritas data, misalnya matakuliah yang sudah diambil tidak bisa dihapus.</li>
+<li>Fitur bawaan seperti validasi, <code>UploadedFile</code>, paginasi, flashdata, dan query builder membuat CRUD dan upload file cepat dibuat sekaligus aman.</li>
+<li>Kedua aplikasi (SIAKAD dan Toko Online) sudah diuji untuk setiap role, termasuk kasus gagal: login salah, akses ditolak, KRS duplikat, pembatalan KRS milik orang lain, stok tidak mencukupi, dan penghapusan data yang masih dipakai.</li>
+<li>Untuk data yang diperebutkan seperti stok, transaksi database dengan <code>SELECT ... FOR UPDATE</code> menjamin stok tidak pernah minus dan pesanan tersimpan utuh atau tidak sama sekali.</li>
+</ul>
+
+<!--══════════════════════════════════════════════════-->
+<h2 style="border-left: 5px solid rgb(190, 242, 100); padding-left: 12px;">Hasil (Foto)</h2>
+<h3>SIAKAD</h3>
+<div class="separator" style="clear: both; text-align: center;"><a href="screenshots/siakad-01-home.png" style="margin-left: 1em; margin-right: 1em;"><img alt="Gambar 1. Halaman beranda SIAKAD" src="screenshots/siakad-01-home.png" style="border: 1px solid rgb(226, 232, 240); max-width: 100%;" width="640" /></a><p style="font-size: 10pt; margin-top: 4px; text-align: center;"><i>Gambar 1. Halaman beranda SIAKAD</i></p></div>
+<div class="separator" style="clear: both; text-align: center;"><a href="screenshots/siakad-02-login.png" style="margin-left: 1em; margin-right: 1em;"><img alt="Gambar 2. Halaman login" src="screenshots/siakad-02-login.png" style="border: 1px solid rgb(226, 232, 240); max-width: 100%;" width="640" /></a><p style="font-size: 10pt; margin-top: 4px; text-align: center;"><i>Gambar 2. Halaman login</i></p></div>
+<div class="separator" style="clear: both; text-align: center;"><a href="screenshots/siakad-03-login-gagal.png" style="margin-left: 1em; margin-right: 1em;"><img alt="Gambar 3. Login gagal (username/password salah)" src="screenshots/siakad-03-login-gagal.png" style="border: 1px solid rgb(226, 232, 240); max-width: 100%;" width="640" /></a><p style="font-size: 10pt; margin-top: 4px; text-align: center;"><i>Gambar 3. Login gagal (username/password salah)</i></p></div>
+<div class="separator" style="clear: both; text-align: center;"><a href="screenshots/siakad-04-admin-dashboard.png" style="margin-left: 1em; margin-right: 1em;"><img alt="Gambar 4. Dashboard admin (SB Admin 2)" src="screenshots/siakad-04-admin-dashboard.png" style="border: 1px solid rgb(226, 232, 240); max-width: 100%;" width="640" /></a><p style="font-size: 10pt; margin-top: 4px; text-align: center;"><i>Gambar 4. Dashboard admin (SB Admin 2)</i></p></div>
+<div class="separator" style="clear: both; text-align: center;"><a href="screenshots/siakad-05-admin-mahasiswa.png" style="margin-left: 1em; margin-right: 1em;"><img alt="Gambar 5. Data mahasiswa dengan foto, pencarian, dan paginasi" src="screenshots/siakad-05-admin-mahasiswa.png" style="border: 1px solid rgb(226, 232, 240); max-width: 100%;" width="640" /></a><p style="font-size: 10pt; margin-top: 4px; text-align: center;"><i>Gambar 5. Data mahasiswa dengan foto, pencarian, dan paginasi</i></p></div>
+<div class="separator" style="clear: both; text-align: center;"><a href="screenshots/siakad-06-admin-mahasiswa-form.png" style="margin-left: 1em; margin-right: 1em;"><img alt="Gambar 6. Form edit mahasiswa dengan upload foto" src="screenshots/siakad-06-admin-mahasiswa-form.png" style="border: 1px solid rgb(226, 232, 240); max-width: 100%;" width="640" /></a><p style="font-size: 10pt; margin-top: 4px; text-align: center;"><i>Gambar 6. Form edit mahasiswa dengan upload foto</i></p></div>
+<div class="separator" style="clear: both; text-align: center;"><a href="screenshots/siakad-07-admin-dosen.png" style="margin-left: 1em; margin-right: 1em;"><img alt="Gambar 7. Data dosen" src="screenshots/siakad-07-admin-dosen.png" style="border: 1px solid rgb(226, 232, 240); max-width: 100%;" width="640" /></a><p style="font-size: 10pt; margin-top: 4px; text-align: center;"><i>Gambar 7. Data dosen</i></p></div>
+<div class="separator" style="clear: both; text-align: center;"><a href="screenshots/siakad-08-admin-matakuliah.png" style="margin-left: 1em; margin-right: 1em;"><img alt="Gambar 8. Data matakuliah" src="screenshots/siakad-08-admin-matakuliah.png" style="border: 1px solid rgb(226, 232, 240); max-width: 100%;" width="640" /></a><p style="font-size: 10pt; margin-top: 4px; text-align: center;"><i>Gambar 8. Data matakuliah</i></p></div>
+<div class="separator" style="clear: both; text-align: center;"><a href="screenshots/siakad-09-admin-restrict.png" style="margin-left: 1em; margin-right: 1em;"><img alt="Gambar 9. Matakuliah yang sudah ada di KRS tidak bisa dihapus (FK RESTRICT)" src="screenshots/siakad-09-admin-restrict.png" style="border: 1px solid rgb(226, 232, 240); max-width: 100%;" width="640" /></a><p style="font-size: 10pt; margin-top: 4px; text-align: center;"><i>Gambar 9. Matakuliah yang sudah ada di KRS tidak bisa dihapus (FK RESTRICT)</i></p></div>
+<div class="separator" style="clear: both; text-align: center;"><a href="screenshots/siakad-10-mhs-dashboard.png" style="margin-left: 1em; margin-right: 1em;"><img alt="Gambar 10. Dashboard mahasiswa" src="screenshots/siakad-10-mhs-dashboard.png" style="border: 1px solid rgb(226, 232, 240); max-width: 100%;" width="640" /></a><p style="font-size: 10pt; margin-top: 4px; text-align: center;"><i>Gambar 10. Dashboard mahasiswa</i></p></div>
+<div class="separator" style="clear: both; text-align: center;"><a href="screenshots/siakad-11-mhs-krs.png" style="margin-left: 1em; margin-right: 1em;"><img alt="Gambar 11. Pengisian KRS" src="screenshots/siakad-11-mhs-krs.png" style="border: 1px solid rgb(226, 232, 240); max-width: 100%;" width="640" /></a><p style="font-size: 10pt; margin-top: 4px; text-align: center;"><i>Gambar 11. Pengisian KRS</i></p></div>
+<div class="separator" style="clear: both; text-align: center;"><a href="screenshots/siakad-12-mhs-khs.png" style="margin-left: 1em; margin-right: 1em;"><img alt="Gambar 12. KHS dengan IP dan IPK" src="screenshots/siakad-12-mhs-khs.png" style="border: 1px solid rgb(226, 232, 240); max-width: 100%;" width="640" /></a><p style="font-size: 10pt; margin-top: 4px; text-align: center;"><i>Gambar 12. KHS dengan IP dan IPK</i></p></div>
+<div class="separator" style="clear: both; text-align: center;"><a href="screenshots/siakad-13-akses-ditolak.png" style="margin-left: 1em; margin-right: 1em;"><img alt="Gambar 13. Mahasiswa membuka halaman admin, akses ditolak" src="screenshots/siakad-13-akses-ditolak.png" style="border: 1px solid rgb(226, 232, 240); max-width: 100%;" width="640" /></a><p style="font-size: 10pt; margin-top: 4px; text-align: center;"><i>Gambar 13. Mahasiswa membuka halaman admin, akses ditolak</i></p></div>
+<div class="separator" style="clear: both; text-align: center;"><a href="screenshots/siakad-14-dosen-dashboard.png" style="margin-left: 1em; margin-right: 1em;"><img alt="Gambar 14. Dashboard dosen" src="screenshots/siakad-14-dosen-dashboard.png" style="border: 1px solid rgb(226, 232, 240); max-width: 100%;" width="640" /></a><p style="font-size: 10pt; margin-top: 4px; text-align: center;"><i>Gambar 14. Dashboard dosen</i></p></div>
+<div class="separator" style="clear: both; text-align: center;"><a href="screenshots/siakad-15-dosen-nilai.png" style="margin-left: 1em; margin-right: 1em;"><img alt="Gambar 15. Daftar matakuliah yang diampu dosen" src="screenshots/siakad-15-dosen-nilai.png" style="border: 1px solid rgb(226, 232, 240); max-width: 100%;" width="640" /></a><p style="font-size: 10pt; margin-top: 4px; text-align: center;"><i>Gambar 15. Daftar matakuliah yang diampu dosen</i></p></div>
+<div class="separator" style="clear: both; text-align: center;"><a href="screenshots/siakad-16-dosen-input-nilai.png" style="margin-left: 1em; margin-right: 1em;"><img alt="Gambar 16. Input nilai peserta" src="screenshots/siakad-16-dosen-input-nilai.png" style="border: 1px solid rgb(226, 232, 240); max-width: 100%;" width="640" /></a><p style="font-size: 10pt; margin-top: 4px; text-align: center;"><i>Gambar 16. Input nilai peserta</i></p></div>
+<h3>Toko Online</h3>
+<div class="separator" style="clear: both; text-align: center;"><a href="screenshots/toko-01-katalog.png" style="margin-left: 1em; margin-right: 1em;"><img alt="Gambar 17. Katalog produk (beranda)" src="screenshots/toko-01-katalog.png" style="border: 1px solid rgb(226, 232, 240); max-width: 100%;" width="640" /></a><p style="font-size: 10pt; margin-top: 4px; text-align: center;"><i>Gambar 17. Katalog produk (beranda)</i></p></div>
+<div class="separator" style="clear: both; text-align: center;"><a href="screenshots/toko-02-filter-kategori.png" style="margin-left: 1em; margin-right: 1em;"><img alt="Gambar 18. Filter produk per kategori" src="screenshots/toko-02-filter-kategori.png" style="border: 1px solid rgb(226, 232, 240); max-width: 100%;" width="640" /></a><p style="font-size: 10pt; margin-top: 4px; text-align: center;"><i>Gambar 18. Filter produk per kategori</i></p></div>
+<div class="separator" style="clear: both; text-align: center;"><a href="screenshots/toko-03-detail-produk.png" style="margin-left: 1em; margin-right: 1em;"><img alt="Gambar 19. Detail produk dengan gambar hasil upload" src="screenshots/toko-03-detail-produk.png" style="border: 1px solid rgb(226, 232, 240); max-width: 100%;" width="640" /></a><p style="font-size: 10pt; margin-top: 4px; text-align: center;"><i>Gambar 19. Detail produk dengan gambar hasil upload</i></p></div>
+<div class="separator" style="clear: both; text-align: center;"><a href="screenshots/toko-04-login.png" style="margin-left: 1em; margin-right: 1em;"><img alt="Gambar 20. Halaman login" src="screenshots/toko-04-login.png" style="border: 1px solid rgb(226, 232, 240); max-width: 100%;" width="640" /></a><p style="font-size: 10pt; margin-top: 4px; text-align: center;"><i>Gambar 20. Halaman login</i></p></div>
+<div class="separator" style="clear: both; text-align: center;"><a href="screenshots/toko-05-register.png" style="margin-left: 1em; margin-right: 1em;"><img alt="Gambar 21. Halaman registrasi pelanggan" src="screenshots/toko-05-register.png" style="border: 1px solid rgb(226, 232, 240); max-width: 100%;" width="640" /></a><p style="font-size: 10pt; margin-top: 4px; text-align: center;"><i>Gambar 21. Halaman registrasi pelanggan</i></p></div>
+<div class="separator" style="clear: both; text-align: center;"><a href="screenshots/toko-06-keranjang-clamp.png" style="margin-left: 1em; margin-right: 1em;"><img alt="Gambar 22. Keranjang: jumlah dibatasi sesuai stok" src="screenshots/toko-06-keranjang-clamp.png" style="border: 1px solid rgb(226, 232, 240); max-width: 100%;" width="640" /></a><p style="font-size: 10pt; margin-top: 4px; text-align: center;"><i>Gambar 22. Keranjang: jumlah dibatasi sesuai stok</i></p></div>
+<div class="separator" style="clear: both; text-align: center;"><a href="screenshots/toko-07-checkout.png" style="margin-left: 1em; margin-right: 1em;"><img alt="Gambar 23. Halaman checkout" src="screenshots/toko-07-checkout.png" style="border: 1px solid rgb(226, 232, 240); max-width: 100%;" width="640" /></a><p style="font-size: 10pt; margin-top: 4px; text-align: center;"><i>Gambar 23. Halaman checkout</i></p></div>
+<div class="separator" style="clear: both; text-align: center;"><a href="screenshots/toko-08-checkout-sukses.png" style="margin-left: 1em; margin-right: 1em;"><img alt="Gambar 24. Checkout berhasil, pesanan dibuat" src="screenshots/toko-08-checkout-sukses.png" style="border: 1px solid rgb(226, 232, 240); max-width: 100%;" width="640" /></a><p style="font-size: 10pt; margin-top: 4px; text-align: center;"><i>Gambar 24. Checkout berhasil, pesanan dibuat</i></p></div>
+<div class="separator" style="clear: both; text-align: center;"><a href="screenshots/toko-09-pesanan-saya.png" style="margin-left: 1em; margin-right: 1em;"><img alt="Gambar 25. Riwayat pesanan pelanggan" src="screenshots/toko-09-pesanan-saya.png" style="border: 1px solid rgb(226, 232, 240); max-width: 100%;" width="640" /></a><p style="font-size: 10pt; margin-top: 4px; text-align: center;"><i>Gambar 25. Riwayat pesanan pelanggan</i></p></div>
+<div class="separator" style="clear: both; text-align: center;"><a href="screenshots/toko-10-akses-ditolak.png" style="margin-left: 1em; margin-right: 1em;"><img alt="Gambar 26. Pelanggan membuka halaman admin, akses ditolak" src="screenshots/toko-10-akses-ditolak.png" style="border: 1px solid rgb(226, 232, 240); max-width: 100%;" width="640" /></a><p style="font-size: 10pt; margin-top: 4px; text-align: center;"><i>Gambar 26. Pelanggan membuka halaman admin, akses ditolak</i></p></div>
+<div class="separator" style="clear: both; text-align: center;"><a href="screenshots/toko-11-admin-dashboard.png" style="margin-left: 1em; margin-right: 1em;"><img alt="Gambar 27. Dashboard admin" src="screenshots/toko-11-admin-dashboard.png" style="border: 1px solid rgb(226, 232, 240); max-width: 100%;" width="640" /></a><p style="font-size: 10pt; margin-top: 4px; text-align: center;"><i>Gambar 27. Dashboard admin</i></p></div>
+<div class="separator" style="clear: both; text-align: center;"><a href="screenshots/toko-12-admin-kategori.png" style="margin-left: 1em; margin-right: 1em;"><img alt="Gambar 28. Data kategori" src="screenshots/toko-12-admin-kategori.png" style="border: 1px solid rgb(226, 232, 240); max-width: 100%;" width="640" /></a><p style="font-size: 10pt; margin-top: 4px; text-align: center;"><i>Gambar 28. Data kategori</i></p></div>
+<div class="separator" style="clear: both; text-align: center;"><a href="screenshots/toko-13-admin-kategori-restrict.png" style="margin-left: 1em; margin-right: 1em;"><img alt="Gambar 29. Kategori yang masih memiliki produk tidak bisa dihapus (FK RESTRICT)" src="screenshots/toko-13-admin-kategori-restrict.png" style="border: 1px solid rgb(226, 232, 240); max-width: 100%;" width="640" /></a><p style="font-size: 10pt; margin-top: 4px; text-align: center;"><i>Gambar 29. Kategori yang masih memiliki produk tidak bisa dihapus (FK RESTRICT)</i></p></div>
+<div class="separator" style="clear: both; text-align: center;"><a href="screenshots/toko-14-admin-produk.png" style="margin-left: 1em; margin-right: 1em;"><img alt="Gambar 30. Data produk" src="screenshots/toko-14-admin-produk.png" style="border: 1px solid rgb(226, 232, 240); max-width: 100%;" width="640" /></a><p style="font-size: 10pt; margin-top: 4px; text-align: center;"><i>Gambar 30. Data produk</i></p></div>
+<div class="separator" style="clear: both; text-align: center;"><a href="screenshots/toko-15-admin-produk-form.png" style="margin-left: 1em; margin-right: 1em;"><img alt="Gambar 31. Form produk dengan upload gambar" src="screenshots/toko-15-admin-produk-form.png" style="border: 1px solid rgb(226, 232, 240); max-width: 100%;" width="640" /></a><p style="font-size: 10pt; margin-top: 4px; text-align: center;"><i>Gambar 31. Form produk dengan upload gambar</i></p></div>
+<div class="separator" style="clear: both; text-align: center;"><a href="screenshots/toko-16-admin-pesanan.png" style="margin-left: 1em; margin-right: 1em;"><img alt="Gambar 32. Data pesanan untuk admin" src="screenshots/toko-16-admin-pesanan.png" style="border: 1px solid rgb(226, 232, 240); max-width: 100%;" width="640" /></a><p style="font-size: 10pt; margin-top: 4px; text-align: center;"><i>Gambar 32. Data pesanan untuk admin</i></p></div>
